@@ -12,6 +12,7 @@ class QueryNeo4J:
     PASSWORD = None
     driver = None
 
+# here would be more sentiment based analyses
     @classmethod
     def initialize(cls):
         load_dotenv()
@@ -81,8 +82,10 @@ class QueryNeo4J:
 
         print("\n📊 Query Result as DataFrame:")
         print(df)
-
         return df
+    
+    def create_sentiment_analysis(cls):
+        pass
 
 if __name__ == "__main__":
     QueryNeo4J.initialize()
