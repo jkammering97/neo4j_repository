@@ -83,6 +83,10 @@ class QueryNeo4J:
         print(df)
 
         return df
+    
+    @classmethod
+    def streamlit_integration(cls):
+        pass
 
 if __name__ == "__main__":
     QueryNeo4J.initialize()
