@@ -1,11 +1,10 @@
-#%%
 from langchain_community.vectorstores import Neo4jVector
 import pandas as pd
 from neo4j import GraphDatabase
 import os
 import time
 from dotenv import load_dotenv
-#%%
+
 class QueryNeo4J:
     """can query the db with fixed class attributes URI, USERNAME and PASSWORD
     """
@@ -31,7 +30,7 @@ class QueryNeo4J:
 
             with cls.driver.session(default_access_mode="READ") as session:
 
-                accept = cls.execution_plan(session, query)
+                accept = cls.execution_plan(query)
                 if accept:
                     # Measure actual execution time
                     start_time = time.time()
@@ -71,7 +70,6 @@ class QueryNeo4J:
     def close_access(cls):
         try:
             cls.driver.close()
-            cls.driver._closed()
             print('connection closed successfully')
         except BaseException as e:
             print(e)
@@ -95,7 +93,7 @@ class QueryNeo4J:
         columns = list(cls.result_data_dict[0].keys()) if cls.result_data_dict else []
         cls.df = pd.DataFrame(cls.result_data_dict, columns=columns)
 
-        print("\n📊 Query Result as DataFrame:")
+        print("\nQuery Result as DataFrame:")
 
         print(cls.df)
 
