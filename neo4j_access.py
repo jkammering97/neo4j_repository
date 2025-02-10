@@ -14,7 +14,6 @@ class QueryNeo4J:
     PASSWORD = None
     driver = None
 
-# here would be more sentiment based analyses
     @classmethod
     def initialize(cls):
         load_dotenv()
@@ -57,7 +56,7 @@ class QueryNeo4J:
         if summary:
             print(summary.plan['args']['string-representation'])
         else:
-            print("⚠️ No execution plan available. (EXPLAIN did not return metadata)")
+            print("No execution plan available. (EXPLAIN did not return metadata)")
 
         while True:
             accept = input("accept execution plan? (type: y/n)")
