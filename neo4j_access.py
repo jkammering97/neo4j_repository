@@ -79,7 +79,7 @@ class QueryNeo4J:
         """Convert Neo4j result into a clean Pandas DataFrame with proper column names"""
 
         if not cls.result_data_dict:
-            print("⚠️ No data retrieved from Neo4j.")
+            print("No data retrieved from Neo4j.")
             return pd.DataFrame()  # Return empty DataFrame if no results
         
         # Detect if results are wrapped in a node key (e.g., {'p': {...}})
@@ -88,7 +88,7 @@ class QueryNeo4J:
 
         if len(node_keys) == 1 and isinstance(first_record[node_keys[0]], dict):
             cls.result_data_dict = [record[node_keys[0]] for record in cls.result_data_dict]
-            print("🛠 Extracted node properties successfully.")
+            print("Extracted node properties successfully.")
 
         columns = list(cls.result_data_dict[0].keys()) if cls.result_data_dict else []
         cls.df = pd.DataFrame(cls.result_data_dict, columns=columns)
