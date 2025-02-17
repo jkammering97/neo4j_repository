@@ -16,9 +16,9 @@ import textwrap
 #%%
 def initialize():
     load_dotenv()
-    URI = os.environ('NEO4J_URI')
-    USERNAME = os.environ('USERNAME')
-    PASSWORD = os.environ('DB_PASSWORD')
+    URI = os.environ.get('NEO4J_URI')
+    USERNAME = os.environ.get('USERNAME')
+    PASSWORD = os.environ.get('DB_PASSWORD')
     # Suppress warnings from Neo4j logs
     import logging
     logging.getLogger("neo4j").setLevel(logging.ERROR)
