@@ -100,6 +100,9 @@ def scatterplot_from_multiple_terms(df, selected_terms):
     st.plotly_chart(fig, use_container_width=True)
 
 ### **Streamlit UI**
+if "term_results_cache" not in st.session_state:
+    st.session_state.term_results_cache = {}  # Dictionary to store results
+    
 st.set_page_config(layout="wide", page_title="Neo4j Term Similarity", page_icon='📖')
 
 st.sidebar.header("Select Terms for Similarity Analysis")
@@ -135,13 +138,20 @@ if st.sidebar.button("Analyze"):
         term_embedding = term_array['embedding'].values[0]
         term_embeddings[term] = term_embedding
 
+    # Stop if no valid terms
     if not term_embeddings:
         st.sidebar.error("No valid terms selected!")
         st.stop()
 
-    # Fetch chunks **once per term, for all years at once**
+    # Fetch chunks once per term, only if not already in session state
     for term, term_embedding in term_embeddings.items():
-        df_results = fetch_chunks_for_term_for_years(years, term, term_embedding, contains)
+        if term in st.session_state.term_results_cache:
+            st.sidebar.success(f"Using cached data for: {term}")
+            df_results = st.session_state.term_results_cache[term]
+        else:
+            st.sidebar.write(f"Fetching new data for: {term}...")
+            df_results = fetch_chunks_for_term_for_years(years, term, term_embedding, contains)
+            st.session_state.term_results_cache[term] = df_results  # Store in session state
 
         # Convert dictionary to DataFrame
         df_results = pd.DataFrame(df_results)
@@ -152,15 +162,18 @@ if st.sidebar.button("Analyze"):
         if "embedding" not in df_results.columns:
             st.error("No embedding data available for the selected term.")
             continue
+
         # Compute cosine similarity for each term
         compute_term_dist_cosine(df_results, term_embedding)
         df_results["term"] = term  # Track term name
         df_results = compute_deviation(df_results)
 
         all_results.append(df_results)
+
     if not all_results:        
-        st.error(f"no results found for any terms.")
+        st.error(f"No results found for any terms.")
         st.stop()
+
     # Combine all results into a single DataFrame
     df_all_terms = pd.concat(all_results, ignore_index=True)
 
