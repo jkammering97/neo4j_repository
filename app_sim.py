@@ -121,7 +121,7 @@ glossary_terms = df_tfnd_glossary_2023['Term'].unique()
 
 # Sidebar selection for multiple terms
 selected_terms = st.sidebar.multiselect("Select one or more terms:", glossary_terms, default=["Biodiversity"])
-
+contains = st.sidebar.radio("please select whether the results should contain the terms specifically or not.",options=['yes','no'])
 start_year, end_year = st.sidebar.select_slider(
     "Please select the time range",
     options=list(range(2015, 2024)),  # Proper list of years
@@ -150,7 +150,7 @@ if st.sidebar.button("Analyze"):
 
     # Fetch chunks **once per term, for all years at once**
     for term, term_embedding in term_embeddings.items():
-        df_results = fetch_chunks_for_term_for_years(years, term, term_embedding)
+        df_results = fetch_chunks_for_term_for_years(years, term, term_embedding, contains)
 
         # Convert dictionary to DataFrame
         df_results = pd.DataFrame(df_results)
@@ -172,56 +172,3 @@ if st.sidebar.button("Analyze"):
 
     # Plot results
     scatterplot_from_multiple_terms(df_all_terms, selected_terms)
-
-# if st.sidebar.button("Analyze"):
-#     st.sidebar.write(f"Fetching embeddings for: {', '.join(selected_terms)}...")
-#     df_results = None
-#     all_results = []
-
-#     for term in selected_terms:
-#         # Get the embedding for the selected term
-#         term_array = df_tfnd_glossary_2023[df_tfnd_glossary_2023['Term'] == term]
-#         if term_array.empty:
-#             st.sidebar.error(f"No embedding found for term: {term}")
-#             continue
-        
-#         term_embedding = term_array['embedding'].values[0]
-
-#         # Fetch statement chunks using `fetch_chunks_for_term_for_years`
-#         df_results_dict = fetch_chunks_for_term_for_years(years, term_embedding)
-
-#         # Flatten embeddings to a DataFrame
-#         df_results = pd.DataFrame([
-#             {
-#                 "year": year,
-#                 "month": record["month"],
-#                 "id": record["id"],
-#                 "company": record["company"],
-#                 "industry": record["industry"],
-#                 "chunk": record["chunk_text"],
-#                 "embedding": record["embedding"],
-#                 "term": term  # Track which term this data belongs to
-#             }
-#             for year, records in df_results_dict.items()
-#             for record in records
-#         ])
-
-#         # Compute cosine similarity
-#         compute_term_dist_cosine(df_results, term_embedding)
-
-#         # Compute deviation
-#         df_results = compute_deviation(df_results)
-
-#         all_results.append(df_results)
-
-#     # Combine all results into a single DataFrame
-#     if all_results:
-#         df_all_terms = pd.concat(all_results, ignore_index=True)
-#         if "month" not in df_all_terms.columns:
-#             st.write(df_all_terms.head())
-#             st.error("Month column is missing! Check data fetching.")
-#             st.stop()  # Stop execution if 'month' is missing
-#         # Plot results
-#         scatterplot_from_multiple_terms(df_all_terms, selected_terms)
-#     else:
-#         st.sidebar.error("No data found for the selected terms.")
