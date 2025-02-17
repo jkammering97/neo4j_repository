@@ -232,8 +232,8 @@ def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, c
         WHERE datetime(e.time).year IN $years
         {term_filter}  
         RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
-               s.text AS statement, datetime(e.time).year AS year, 
-               datetime(e.time).month AS month, similarChunk.embedding AS embedding, score
+            s.text AS statement, datetime(e.time).year AS year, 
+            datetime(e.time).month AS month, similarChunk.embedding AS embedding, score
         ORDER BY year DESC, month ASC, score DESC
         """
 
@@ -249,9 +249,9 @@ def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, c
             MATCH (c:Chunk) WHERE elementId(c) IN $batch_ids
             MATCH (c)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)<-[:ARRANGED]-(co:Company)-[:IN_INDUSTRY]->(i:Industry)
             RETURN elementId(c) AS id, c.embedding AS embedding, 
-                   substring(s.text, c.start_index, c.end_index - c.start_index+1) AS chunk_text,
-                   s.name AS name, datetime(e.time).year AS year, datetime(e.time).month AS month, 
-                   co.name AS company, i.name AS industry
+                substring(s.text, c.start_index, c.end_index - c.start_index+1) AS chunk_text,
+                s.name AS name, datetime(e.time).year AS year, datetime(e.time).month AS month, 
+                co.name AS company, i.name AS industry
             ORDER BY year DESC, month ASC
             """
             results = session.run(batch_query, batch_ids=batch_ids)
@@ -266,75 +266,8 @@ def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, c
                 chunks.append(chunk)
 
     driver.close()
+
     return chunks
-
-# def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, chunks_per_year=50, batch_size=200):
-#     """Fetch chunks for all selected years in a single Neo4j query (one per term)."""
-#     driver = initialize()
-
-#     with driver.session() as session:
-#         # id_query = """
-#         # CALL db.index.vector.queryNodes('chunk_embeddings', $n, $glossary_embedding)
-#         # YIELD node AS similarChunk, score
-#         # MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
-#         # WHERE datetime(e.time).year IN $years
-#         #     AND size(s.text) > 25  // Adjust length requirement here
-#         # RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
-#         #        s.text AS statement, datetime(e.time).year AS year, 
-#         #        datetime(e.time).month AS month, score
-#         # ORDER BY year DESC, month ASC, score DESC
-#         # """
-#         id_query = """
-#         CALL db.index.vector.queryNodes('chunk_embeddings', $n, $glossary_embedding)
-#         YIELD node AS similarChunk, score
-#         MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
-#         WHERE datetime(e.time).year IN $years
-#         AND size(s.text) > 15  // Adjust length requirement here
-#         AND s.text CONTAINS $term  // Ensure the term appears in the chunk
-#         RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
-#             s.text AS statement, datetime(e.time).year AS year, 
-#             datetime(e.time).month AS month, score
-#         ORDER BY year DESC, month ASC, score DESC
-#         """
-#         ids = [record["chunk_id"] for record in session.run(
-#             id_query, years=years, n=chunks_per_year, glossary_embedding=glossary_embedding
-#         )]
-
-#         total_ids = len(ids)
-#         chunks = []
-
-#         def fetch_batch(session, batch_ids):
-#             batch_query = """
-#             MATCH (c:Chunk) WHERE elementId(c) IN $batch_ids
-#             MATCH (c)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)<-[:ARRANGED]-(co:Company)-[:IN_INDUSTRY]->(i:Industry)
-#             RETURN elementId(c) AS id, c.embedding AS embedding, 
-#                    substring(s.text, c.start_index, c.end_index - c.start_index+1) AS chunk_text,
-#                    s.name AS name, datetime(e.time).year AS year, datetime(e.time).month AS month, 
-#                    co.name AS company, i.name AS industry
-#             ORDER BY year DESC, month ASC
-#             """
-#             results = session.run(batch_query, batch_ids=batch_ids)
-#             return [dict(record) for record in results]
-
-#         for i in range(0, total_ids, batch_size):
-#             batch_ids = ids[i:i + batch_size]
-#             batch_chunks = fetch_batch(session, batch_ids)
-
-#             for chunk in batch_chunks:
-#                 chunk['embedding'] = np.array(chunk['embedding'], dtype=np.float32)
-                
-#                 # Ensure all relevant data is passed to the chunk
-#                 chunk['year'] = chunk.get('year', None)  # Ensure year is included
-#                 chunk['month'] = chunk.get('month', None)  # Ensure month is included
-#                 chunk['company'] = chunk.get('company', None)  # Ensure company data is passed
-#                 chunk['industry'] = chunk.get('industry', None)  # Ensure industry data is passed
-#                 chunk['statement'] = chunk.get('chunk_text', None)  # Ensure the chunk text is correctly included
-
-#                 chunks.append(chunk)
-
-#     driver.close()
-#     print(f'Processing size {len(chunks)} for {years}')
-#     return chunks
 
 def flatten_embeddings(dict_yrl_results: dict):
     flattened_data = []
