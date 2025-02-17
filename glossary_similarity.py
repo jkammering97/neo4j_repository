@@ -19,6 +19,10 @@ def initialize():
     URI = os.environ.get('NEO4J_URI')
     USERNAME = os.environ.get('USERNAME')
     PASSWORD = os.environ.get('DB_PASSWORD')
+
+    print("NEO4J_URI:", os.environ.get("NEO4J_URI"))
+    print("USERNAME:", os.environ.get("USERNAME"))
+    print("DB_PASSWORD:", os.environ.get("DB_PASSWORD"))
     # Suppress warnings from Neo4j logs
     import logging
     logging.getLogger("neo4j").setLevel(logging.ERROR)
