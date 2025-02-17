@@ -240,6 +240,16 @@ if st.sidebar.button("Analyze"):
     # Combine all results into a single DataFrame
     df_all_terms = pd.concat(all_results, ignore_index=True)
 
+    if "chunk" in df_all_terms.columns:
+        df_all_terms["wrapped_chunk"] = df_all_terms["chunk"].apply(lambda x: "<br>".join(textwrap.wrap(str(x), 50)))
+    elif "chunk_text" in df_all_terms.columns:
+        df_all_terms.rename(columns={"chunk_text": "chunk"}, inplace=True)
+        df_all_terms["wrapped_chunk"] = df_all_terms["chunk"].apply(lambda x: "<br>".join(textwrap.wrap(str(x), 50)))
+    else:
+        st.error("Missing 'chunk' column in DataFrame! Check data fetching.")
+        st.write(df_all_terms.head())
+        st.stop()
+
     if "month" not in df_all_terms.columns:
         st.write(df_all_terms.head())
         st.error("Month column is missing! Check data fetching.")
