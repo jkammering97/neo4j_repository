@@ -167,7 +167,9 @@ if st.sidebar.button("Analyze"):
         df_results = compute_deviation(df_results)
 
         all_results.append(df_results)
-
+    if not all_results:        
+        st.error(f"no results found for any terms.")
+        st.stop()
     # Combine all results into a single DataFrame
     df_all_terms = pd.concat(all_results, ignore_index=True)
 
