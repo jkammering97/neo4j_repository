@@ -33,6 +33,73 @@ def compute_deviation(df):
     return df
 
 def scatterplot_from_multiple_terms(df, selected_terms):
+    """Creates a scatter plot showing similarity over time for multiple terms, adapting to Streamlit's theme."""
+
+    # Detect Streamlit theme (light or dark)
+    theme = st.get_option("theme.base")
+    
+    # Set colors based on theme
+    if theme == "dark":
+        bg_color = "black"
+        text_color = "white"
+        line_colors = px.colors.qualitative.Set1
+    else:
+        bg_color = "white"
+        text_color = "black"
+        line_colors = px.colors.qualitative.Set2
+
+    # Assign unique colors for each term
+    term_color_map = {term: line_colors[i % len(line_colors)] for i, term in enumerate(selected_terms)}
+
+    fig = go.Figure()
+
+    for term in selected_terms:
+        term_df = df[df["term"] == term].copy()
+        term_df["normalized_similarity"] = term_df["similarity"]
+
+        term_df["month"] = term_df["month"].fillna(1).astype(int)
+        term_df["date"] = term_df.apply(lambda row: f"{row['year']}-{str(row['month']).zfill(2)}", axis=1)
+
+        term_df = term_df.sort_values(["year", "month"])
+
+        fig.add_trace(go.Scatter(
+            x=term_df['date'],
+            y=term_df['normalized_similarity'],  
+            mode='lines',
+            customdata=term_df[['id', 'year', 'month', 'similarity', 'wrapped_chunk', 'company', 'industry']],
+            hovertemplate="<b>ID:</b> %{customdata[0]}<br>"
+                        "<b>Year:</b> %{customdata[1]}<br>"
+                        "<b>Month:</b> %{customdata[2]}<br>"
+                        "<b>Similarity:</b> %{customdata[3]:.3f}<br>"
+                        "<b>Statement:</b> %{customdata[4]}<br>"
+                        "<b>Company:</b> %{customdata[5]}<br>"
+                        "<b>Industry:</b> %{customdata[6]}<br>",
+            line=dict(shape="spline", smoothing=0.3, width=2, color=term_color_map[term]),
+            name=f"Similarity for {term}"
+        ))
+
+    # Update layout dynamically
+    fig.update_layout(
+        title="<b>Similarity Over Time for Multiple Terms</b>",
+        title_font=dict(size=22, family="Arial", color=text_color),
+        xaxis=dict(title="<b>Year</b>", tickmode="array",
+                   tickvals=[f"{year}-01" for year in df["year"].unique()],
+                   ticktext=[str(year) for year in df["year"].unique()],
+                   tickangle=0, color=text_color, title_font=dict(size=18)),
+        yaxis=dict(title="<b>Similarity (1 = Term Embedding)</b>", range=[0, 1.1], 
+                   color=text_color, title_font=dict(size=18)),
+        hovermode="closest",
+        plot_bgcolor=bg_color,
+        paper_bgcolor=bg_color,
+        font=dict(family="Arial", size=14, color=text_color),
+        legend=dict(font=dict(color=text_color)),
+        height=800,
+        width=1200
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+# def scatterplot_from_multiple_terms(df, selected_terms):
     """Creates a single smooth scatter plot showing similarity over time for multiple terms, with extended hover data."""
 
     # Ensure 'chunk' column exists
