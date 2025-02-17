@@ -223,7 +223,6 @@ def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, c
     driver = initialize()
 
     with driver.session() as session:
-        # Adjust query based on 'contains' option
         term_filter = "AND s.text CONTAINS $term" if contains == "yes" else ""
 
         id_query = f"""
@@ -231,10 +230,10 @@ def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, c
         YIELD node AS similarChunk, score
         MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
         WHERE datetime(e.time).year IN $years
-        {term_filter}  // Ensure the term appears in the chunk only if 'contains' is 'yes'
+        {term_filter}  
         RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
                s.text AS statement, datetime(e.time).year AS year, 
-               datetime(e.time).month AS month, score
+               datetime(e.time).month AS month, similarChunk.embedding AS embedding, score
         ORDER BY year DESC, month ASC, score DESC
         """
 
@@ -263,19 +262,11 @@ def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, c
             batch_chunks = fetch_batch(session, batch_ids)
 
             for chunk in batch_chunks:
-                chunk['embedding'] = np.array(chunk['embedding'], dtype=np.float32)
-                chunk['year'] = chunk.get('year', None)
-                chunk['month'] = chunk.get('month', None)
-                chunk['company'] = chunk.get('company', None)
-                chunk['industry'] = chunk.get('industry', None)
-                chunk['statement'] = chunk.get('chunk_text', None)
-
+                chunk['embedding'] = np.array(chunk['embedding'], dtype=np.float32)  # Ensure embedding is included
                 chunks.append(chunk)
 
     driver.close()
-    print(f'Processing size {len(chunks)} for {years}')
     return chunks
-
 
 # def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, chunks_per_year=50, batch_size=200):
 #     """Fetch chunks for all selected years in a single Neo4j query (one per term)."""
