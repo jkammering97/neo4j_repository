@@ -14,21 +14,30 @@ import plotly.graph_objects as go
 import plotly.express as px
 import textwrap
 #%%
-def initialize():
-    load_dotenv()
-    URI = os.environ.get('NEO4J_URI')
-    USERNAME = os.environ.get('USERNAME')
-    PASSWORD = os.environ.get('DB_PASSWORD')
 
-    print("NEO4J_URI:", os.environ.get("NEO4J_URI"))
-    print("USERNAME:", os.environ.get("USERNAME"))
-    print("DB_PASSWORD:", os.environ.get("DB_PASSWORD"))
+def initialize():
+    """Initialize the Neo4j driver using Streamlit secrets for deployment."""
+    
+    # First, check if credentials are in Streamlit Secrets (for Streamlit Cloud)
+    if "connections" in st.secrets:
+        URI = st.secrets["connections"]["NEO4J_URI"]
+        USERNAME = st.secrets["connections"]["USERNAME"]
+        PASSWORD = st.secrets["connections"]["DB_PASSWORD"]
+    else:
+        # If not using Streamlit Cloud, fall back to environment variables
+        URI = os.environ.get("NEO4J_URI")
+        USERNAME = os.environ.get("USERNAME")
+        PASSWORD = os.environ.get("DB_PASSWORD")
+
+    # Debugging: Print the credentials (only for debugging, remove later!)
+    print(f"NEO4J_URI: {URI}")
+    print(f"USERNAME: {USERNAME}")
+    print(f"DB_PASSWORD: {'HIDDEN' if PASSWORD else 'None'}")
     # Suppress warnings from Neo4j logs
     import logging
     logging.getLogger("neo4j").setLevel(logging.ERROR)
-    
     if not URI or not USERNAME or not PASSWORD:
-        raise ValueError("Neo4j credentials are missing! Set them in GitHub Secrets.")
+        raise ValueError("Neo4j credentials are missing! Ensure they are set in GitHub Secrets or your .env file.")
 
     return GraphDatabase.driver(URI, auth=(USERNAME, PASSWORD))
 
