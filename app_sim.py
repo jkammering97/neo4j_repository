@@ -102,7 +102,7 @@ def scatterplot_from_multiple_terms(df, selected_terms):
 ### **Streamlit UI**
 if "term_results_cache" not in st.session_state:
     st.session_state.term_results_cache = {}  # Dictionary to store results
-    
+
 st.set_page_config(layout="wide", page_title="Neo4j Term Similarity", page_icon='📖')
 
 st.sidebar.header("Select Terms for Similarity Analysis")
@@ -145,13 +145,18 @@ if st.sidebar.button("Analyze"):
 
     # Fetch chunks once per term, only if not already in session state
     for term, term_embedding in term_embeddings.items():
-        if term in st.session_state.term_results_cache:
-            st.sidebar.success(f"Using cached data for: {term}")
-            df_results = st.session_state.term_results_cache[term]
+        if term in st.session_state.term_results_cache and st.session_state.term_results_cache[term]["contains"] == contains:
+            st.sidebar.success(f"Using cached data for: {term} (contains={contains})")
+            df_results = st.session_state.term_results_cache[term]["data"]
         else:
-            st.sidebar.write(f"Fetching new data for: {term}...")
+            st.sidebar.write(f"Fetching new data for: {term} (contains={contains})...")
             df_results = fetch_chunks_for_term_for_years(years, term, term_embedding, contains)
-            st.session_state.term_results_cache[term] = df_results  # Store in session state
+
+        #  Store both the data and the contains state in cache
+        st.session_state.term_results_cache[term] = {
+            "data": df_results,
+            "contains": contains
+        }
 
         # Convert dictionary to DataFrame
         df_results = pd.DataFrame(df_results)
