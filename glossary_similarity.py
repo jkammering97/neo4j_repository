@@ -29,10 +29,6 @@ def initialize():
         USERNAME = os.environ.get("USERNAME")
         PASSWORD = os.environ.get("DB_PASSWORD")
 
-    # Debugging: Print the credentials (only for debugging, remove later!)
-    print(f"NEO4J_URI: {URI}")
-    print(f"USERNAME: {USERNAME}")
-    print(f"DB_PASSWORD: {'HIDDEN' if PASSWORD else 'None'}")
     # Suppress warnings from Neo4j logs
     import logging
     logging.getLogger("neo4j").setLevel(logging.ERROR)
@@ -223,7 +219,7 @@ def make_yrl_query(year, glossary_embedding, chunks_per_year=250, batch_size=100
     print(f'Processing size {len(chunks)} for year {year}')
     return chunks
 
-def fetch_chunks_for_term_for_years(years, glossary_embedding, chunks_per_year=100, batch_size=200):
+def fetch_chunks_for_term_for_years(years, glossary_embedding, chunks_per_year=50, batch_size=200):
     """Fetch chunks for all selected years in a single Neo4j query (one per term)."""
     driver = initialize()
 
@@ -232,7 +228,8 @@ def fetch_chunks_for_term_for_years(years, glossary_embedding, chunks_per_year=1
         CALL db.index.vector.queryNodes('chunk_embeddings', $n, $glossary_embedding)
         YIELD node AS similarChunk, score
         MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
-        WHERE datetime(e.time).year IN $years  // Fetch all years at once
+        WHERE datetime(e.time).year IN $years
+            AND size(s.text) > 50  // Adjust length requirement here
         RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
                s.text AS statement, datetime(e.time).year AS year, 
                datetime(e.time).month AS month, score

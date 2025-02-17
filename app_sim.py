@@ -32,68 +32,6 @@ def compute_deviation(df):
     df["deviation"] = 1 - df["similarity"]  # Higher similarity = lower deviation
     return df
 
-# def scatterplot_from_multiple_terms(df, selected_terms):
-#     """Creates a single scatter plot showing similarity peaks for multiple terms."""
-
-#     df["wrapped_chunk"] = df["chunk"].apply(lambda x: "<br>".join(textwrap.wrap(x, 50)))
-
-#     # Assign unique colors for each term
-#     term_colors = px.colors.qualitative.Set1 + px.colors.qualitative.Set3  # Large color palette
-#     term_color_map = {term: term_colors[i % len(term_colors)] for i, term in enumerate(selected_terms)}
-
-#     # Initialize figure ONCE (Fixes multiple pages issue)
-#     fig = go.Figure()
-
-#     # Add similarity trend for each term in the SAME figure
-#     for term in selected_terms:
-#         term_df = df[df["term"] == term]
-
-#         # Normalize similarity to be in range [0,1] so 1 is the term embedding
-#         term_df["normalized_similarity"] = term_df["similarity"]
-
-#         # Sort values to make a continuous line graph
-#         term_df = term_df.sort_values("year")
-
-#         fig.add_trace(go.Scatter(
-#             x=term_df['year'],
-#             y=term_df['normalized_similarity'],  
-#             mode='lines+markers',
-#             customdata=term_df[['id', 'similarity', 'wrapped_chunk']],
-#             hovertemplate="<b>ID:</b> %{customdata[0]}<br>"
-#                           "<b>Similarity:</b> %{customdata[1]:.3f}<br>"
-#                           "<b>Statement:</b> %{customdata[2]}<br>",
-#             marker=dict(size=6, color=term_color_map[term], opacity=0.8),
-#             line=dict(color=term_color_map[term], width=2),
-#             name=f"Similarity for {term}"
-#         ))
-
-#         # Add term embedding marker (Set to 1 at the top)
-#         fig.add_trace(go.Scatter(
-#             x=[term_df["year"].min()],  # Place term embedding at min year
-#             y=[1],  # Term embedding should be at 1.0 (top)
-#             mode="markers",
-#             marker=dict(size=14, color=term_color_map[term], symbol="diamond", line=dict(width=2, color="black")),
-#             name=f"{term} Term Embedding"
-#         ))
-
-#     # Update layout with app.py styling
-#     fig.update_layout(
-#         title="<b>Similarity Over Time for Multiple Terms</b>",
-#         title_font=dict(size=22, family="Arial", color="white"),
-#         xaxis=dict(title="<b>Year</b>", tickmode="linear", dtick=1, color="white", title_font=dict(size=18)),
-#         yaxis=dict(title="<b>Similarity (1 = Term Embedding)</b>", range=[0, 1.1], color="white", title_font=dict(size=18)),
-#         hovermode="closest",
-#         plot_bgcolor="black",
-#         paper_bgcolor="black",
-#         font=dict(family="Arial", size=14, color="white"),
-#         legend=dict(font=dict(color="white")),
-#         height=800,  # Increased plot height for better visibility
-#         width=1200   # Increased plot width
-#     )
-
-#     # **Fix: Call `st.plotly_chart(fig)` only ONCE!**
-#     st.plotly_chart(fig, use_container_width=True)
-
 def scatterplot_from_multiple_terms(df, selected_terms):
     """Creates a single smooth scatter plot showing similarity over time for multiple terms, with extended hover data."""
 
@@ -141,7 +79,7 @@ def scatterplot_from_multiple_terms(df, selected_terms):
                         "<b>Statement:</b> %{customdata[4]}<br>"
                         "<b>Company:</b> %{customdata[5]}<br>"
                         "<b>Industry:</b> %{customdata[6]}<br>",
-            line=dict(shape="spline", smoothing=0.7, width=2, color=term_color_map[term]),  # Smoother curves, thicker lines
+            line=dict(shape="spline", smoothing=0.1, width=2, color=term_color_map[term]),  # Smoother curves, thicker lines
             name=f"Similarity for {term}"
         ))
 
