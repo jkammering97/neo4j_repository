@@ -79,7 +79,7 @@ def scatterplot_from_multiple_terms(df, selected_terms):
                         "<b>Statement:</b> %{customdata[4]}<br>"
                         "<b>Company:</b> %{customdata[5]}<br>"
                         "<b>Industry:</b> %{customdata[6]}<br>",
-            line=dict(shape="spline", smoothing=0.1, width=2, color=term_color_map[term]),  # Smoother curves, thicker lines
+            line=dict(shape="spline", smoothing=0.3, width=2, color=term_color_map[term]),  # Smoother curves, thicker lines
             name=f"Similarity for {term}"
         ))
 
