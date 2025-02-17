@@ -150,7 +150,7 @@ if st.sidebar.button("Analyze"):
 
     # Fetch chunks **once per term, for all years at once**
     for term, term_embedding in term_embeddings.items():
-        df_results = fetch_chunks_for_term_for_years(years, term_embedding)
+        df_results = fetch_chunks_for_term_for_years(years, term, term_embedding)
 
         # Convert dictionary to DataFrame
         df_results = pd.DataFrame(df_results)

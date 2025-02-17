@@ -219,20 +219,32 @@ def make_yrl_query(year, glossary_embedding, chunks_per_year=250, batch_size=100
     print(f'Processing size {len(chunks)} for year {year}')
     return chunks
 
-def fetch_chunks_for_term_for_years(years, glossary_embedding, chunks_per_year=50, batch_size=200):
+def fetch_chunks_for_term_for_years(years, term, glossary_embedding, chunks_per_year=50, batch_size=200):
     """Fetch chunks for all selected years in a single Neo4j query (one per term)."""
     driver = initialize()
 
     with driver.session() as session:
+        # id_query = """
+        # CALL db.index.vector.queryNodes('chunk_embeddings', $n, $glossary_embedding)
+        # YIELD node AS similarChunk, score
+        # MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
+        # WHERE datetime(e.time).year IN $years
+        #     AND size(s.text) > 25  // Adjust length requirement here
+        # RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
+        #        s.text AS statement, datetime(e.time).year AS year, 
+        #        datetime(e.time).month AS month, score
+        # ORDER BY year DESC, month ASC, score DESC
+        # """
         id_query = """
         CALL db.index.vector.queryNodes('chunk_embeddings', $n, $glossary_embedding)
         YIELD node AS similarChunk, score
         MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
         WHERE datetime(e.time).year IN $years
-            AND size(s.text) > 25  // Adjust length requirement here
+        AND size(s.text) > 15  // Adjust length requirement here
+        AND s.text CONTAINS $term  // Ensure the term appears in the chunk
         RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
-               s.text AS statement, datetime(e.time).year AS year, 
-               datetime(e.time).month AS month, score
+            s.text AS statement, datetime(e.time).year AS year, 
+            datetime(e.time).month AS month, score
         ORDER BY year DESC, month ASC, score DESC
         """
         ids = [record["chunk_id"] for record in session.run(
