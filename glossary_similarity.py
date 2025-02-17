@@ -22,9 +22,11 @@ def initialize():
     # Suppress warnings from Neo4j logs
     import logging
     logging.getLogger("neo4j").setLevel(logging.ERROR)
+    
+    if not URI or not USERNAME or not PASSWORD:
+        raise ValueError("Neo4j credentials are missing! Set them in GitHub Secrets.")
 
-    driver = GraphDatabase.driver(URI, auth=(USERNAME, PASSWORD))
-    return driver
+    return GraphDatabase.driver(URI, auth=(USERNAME, PASSWORD))
 
 def compare_glossary_to_statements(glossary_embedding, n=10):
     """Finds the most similar database statements for a given glossary term embedding."""
