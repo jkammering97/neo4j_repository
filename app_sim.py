@@ -156,11 +156,11 @@ if st.sidebar.button("Analyze"):
         df_results = pd.DataFrame(df_results)
         if df_results.empty:
             st.warning(f"No results found for '{term}' in the selected time range.")
-            st.stop()  # Stop further execution in Streamlit
+            continue
 
         if "embedding" not in df_results.columns:
             st.error("No embedding data available for the selected term.")
-            st.stop()
+            continue
         # Compute cosine similarity for each term
         compute_term_dist_cosine(df_results, term_embedding)
         df_results["term"] = term  # Track term name
