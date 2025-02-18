@@ -41,7 +41,7 @@ def scatterplot_from_multiple_terms(df, selected_terms):
         theme = "dark"  # Force dark mode as a default
     # Set colors based on theme
     if theme == "dark":
-        bg_color = "black"
+        bg_color = "#1E1E1E"  # Replace this with the exact extracted color
         text_color = "white"
         line_colors = px.colors.qualitative.Set1
     else:
