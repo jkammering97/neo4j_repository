@@ -37,7 +37,7 @@ def scatterplot_from_multiple_terms(df, selected_terms):
 
     # Detect Streamlit theme (light or dark)
     theme = st.get_option("theme.base")
-    
+    st.write("Detected theme:", st.get_option("theme.base"))
     # Set colors based on theme
     if theme == "dark":
         bg_color = "black"
