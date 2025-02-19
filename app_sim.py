@@ -122,6 +122,8 @@ start_year, end_year = st.sidebar.select_slider(
     options=list(range(2015, 2024)),  # Proper list of years
     value=(2015, 2023)  # Default selected range
 )
+n_chunks_per_year = st.sidebar.selectbox("please select the number of chunks to be evaluated per year",options=[25,50,75,100,125,150,250])
+
 years = list(range(start_year, end_year + 1))  # Generate all years in between
 
 if st.sidebar.button("Analyze"):
@@ -151,7 +153,7 @@ if st.sidebar.button("Analyze"):
             df_results = st.session_state.term_results_cache[term]["data"]
         else:
             st.sidebar.write(f"Fetching new data for: {term} (contains={contains})...")
-            df_results = fetch_chunks_for_term_for_years(years, term, term_embedding, contains)
+            df_results = fetch_chunks_for_term_for_years(years, term, term_embedding, contains,chunks_per_year=n_chunks_per_year)
 
         #  Store both the data and the contains state in cache
         st.session_state.term_results_cache[term] = {
