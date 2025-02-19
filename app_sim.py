@@ -206,8 +206,7 @@ if st.sidebar.button("Analyze"):
     # Combine all results into a single DataFrame
     df_all_terms = pd.concat(all_results, ignore_index=True)
      # set the all terms to the cache to be able to use radio switch for markers/lines    
-    st.session_state.df_all_terms = pd.concat(all_results, ignore_index=True)
-
+    
     if "chunk" in df_all_terms.columns:
         df_all_terms["wrapped_chunk"] = df_all_terms["chunk"].apply(lambda x: "<br>".join(textwrap.wrap(str(x), 50)))
     elif "chunk_text" in df_all_terms.columns:
@@ -220,6 +219,7 @@ if st.sidebar.button("Analyze"):
     if "month" not in df_all_terms.columns:
         st.write(df_all_terms.head())
         st.stop()
+    st.session_state.df_all_terms = pd.concat(all_results, ignore_index=True)
 
 # Ensure mode selection persists
 if "plot_mode" not in st.session_state:
