@@ -186,7 +186,7 @@ def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, s
         YIELD node AS similarChunk, score
         MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
         WHERE datetime(e.time).year IN $years
-        AND size(s.text) > 25  // Adjust length requirement here
+        AND size(s.text) > 45  // Adjust length requirement here
         {term_filter}  
         RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
             s.text AS statement, datetime(e.time).year AS year, 
