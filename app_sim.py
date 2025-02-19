@@ -239,6 +239,7 @@ if plot_mode != st.session_state.plot_mode:
 
 # Render graph with cached data
 if st.session_state.df_all_terms is not None:
+    print(st.session_state.df_all_terms.head(1))
     scatterplot_from_multiple_terms(st.session_state.df_all_terms, selected_terms, st.session_state.plot_mode)
 else:
     st.warning("Click 'Analyze' to fetch data before visualizing.")
