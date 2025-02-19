@@ -204,13 +204,9 @@ if st.sidebar.button("Analyze"):
         st.stop()
    
     # Combine all results into a single DataFrame
-<<<<<<< Updated upstream
-    df_results = pd.concat(all_results, ignore_index=True)
-=======
     df_all_terms = pd.concat(all_results, ignore_index=True)
      # set the all terms to the cache to be able to use radio switch for markers/lines    
     st.session_state.df_all_terms = pd.concat(all_results, ignore_index=True)
->>>>>>> Stashed changes
 
     if "chunk" in df_results.columns:
         df_results["wrapped_chunk"] = df_results["chunk"].apply(lambda x: "<br>".join(textwrap.wrap(str(x), 50)))
@@ -218,21 +214,11 @@ if st.sidebar.button("Analyze"):
         df_results.rename(columns={"chunk_text": "chunk"}, inplace=True)
         df_results["wrapped_chunk"] = df_results["chunk"].apply(lambda x: "<br>".join(textwrap.wrap(str(x), 50)))
     else:
-<<<<<<< Updated upstream
-        st.error("Missing 'chunk' column in DataFrame! Check data fetching.")
-        st.write(df_results.head())
-        st.stop()
-
-    if "month" not in df_results.columns:
-        st.write(df_results.head())
-        st.error("Month column is missing! Check data fetching.")
-=======
         st.write(df_all_terms.head())
         st.stop()
 
     if "month" not in df_all_terms.columns:
         st.write(df_all_terms.head())
->>>>>>> Stashed changes
         st.stop()
 
 # Ensure mode selection persists
@@ -251,15 +237,8 @@ if plot_mode != st.session_state.plot_mode:
     st.session_state.plot_mode = plot_mode
     st.rerun()
 
-<<<<<<< Updated upstream
-# Check if we have stored data before rendering
-if "df_results" in st.session_state and st.session_state.df_results is not None:
-    # Render graph with cached data
-    scatterplot_from_multiple_terms(st.session_state.df_results, selected_terms, st.session_state.plot_mode)
-=======
 # Render graph with cached data
 if st.session_state.df_all_terms is not None:
     scatterplot_from_multiple_terms(st.session_state.df_all_terms, selected_terms, st.session_state.plot_mode)
->>>>>>> Stashed changes
 else:
     st.warning("Click 'Analyze' to fetch data before visualizing.")
