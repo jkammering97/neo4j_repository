@@ -169,7 +169,7 @@ if st.sidebar.button("Analyze"):
         else:
             st.sidebar.write(f"Fetching new data for: {term}...")
             df_results = fetch_chunks_for_term_for_years(years, term, term_embedding, contains, chunks_per_year=n_chunks_per_year)
-
+            st.session_state.df_results = df_results
             # Store in session cache
             st.session_state.term_results_cache[cache_key] = {
                 "data": df_results,
@@ -201,20 +201,20 @@ if st.sidebar.button("Analyze"):
         st.stop()
 
     # Combine all results into a single DataFrame
-    df_all_terms = pd.concat(all_results, ignore_index=True)
+    df_results = pd.concat(all_results, ignore_index=True)
 
-    if "chunk" in df_all_terms.columns:
-        df_all_terms["wrapped_chunk"] = df_all_terms["chunk"].apply(lambda x: "<br>".join(textwrap.wrap(str(x), 50)))
-    elif "chunk_text" in df_all_terms.columns:
-        df_all_terms.rename(columns={"chunk_text": "chunk"}, inplace=True)
-        df_all_terms["wrapped_chunk"] = df_all_terms["chunk"].apply(lambda x: "<br>".join(textwrap.wrap(str(x), 50)))
+    if "chunk" in df_results.columns:
+        df_results["wrapped_chunk"] = df_results["chunk"].apply(lambda x: "<br>".join(textwrap.wrap(str(x), 50)))
+    elif "chunk_text" in df_results.columns:
+        df_results.rename(columns={"chunk_text": "chunk"}, inplace=True)
+        df_results["wrapped_chunk"] = df_results["chunk"].apply(lambda x: "<br>".join(textwrap.wrap(str(x), 50)))
     else:
         st.error("Missing 'chunk' column in DataFrame! Check data fetching.")
-        st.write(df_all_terms.head())
+        st.write(df_results.head())
         st.stop()
 
-    if "month" not in df_all_terms.columns:
-        st.write(df_all_terms.head())
+    if "month" not in df_results.columns:
+        st.write(df_results.head())
         st.error("Month column is missing! Check data fetching.")
         st.stop()
 
@@ -234,8 +234,8 @@ if plot_mode != st.session_state.plot_mode:
     st.rerun()
 
 # Check if we have stored data before rendering
-if "df_all_terms" in st.session_state and st.session_state.df_all_terms is not None:
+if "df_results" in st.session_state and st.session_state.df_results is not None:
     # Render graph with cached data
-    scatterplot_from_multiple_terms(st.session_state.df_all_terms, selected_terms, st.session_state.plot_mode)
+    scatterplot_from_multiple_terms(st.session_state.df_results, selected_terms, st.session_state.plot_mode)
 else:
     st.warning("Click 'Analyze' to fetch data before visualizing.")
