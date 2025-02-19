@@ -76,7 +76,7 @@ def scatterplot_from_multiple_terms(df, selected_terms, mode):
                         "<b>Company:</b> %{customdata[5]}<br>"
                         "<b>Industry:</b> %{customdata[6]}<br>",
             line=dict(shape="spline", smoothing=0.3, width=2, color=term_color_map[term]) if mode == "Lines" else None,
-            marker=dict(size=5, opacity=0.6) if mode == "Markers" else None,
+            marker=dict(size=5, opacity=0.6) if mode == "Markers" else "Lines",
             name="<br>".join(textwrap.wrap(f"Similarity for {term}", width=30))  # Wrap legend text
         ))
 
