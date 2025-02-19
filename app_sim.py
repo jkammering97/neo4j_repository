@@ -10,6 +10,19 @@ import os
 
 # Import functions from glossary_similarity.py
 from glossary_similarity import fetch_chunks_for_term_for_years, fetch_chunks_for_term_for_years, compute_term_dist_cosine
+st.markdown(
+    """
+    <style>
+    /* Reduce font size of selected terms */
+    div[data-baseweb="tag"] {
+        font-size: 12px !important; /* Adjust size as needed */
+        white-space: nowrap; /* Prevent text from wrapping */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 
 ### **Neo4j Initialization**
 def init_graph_DB():
