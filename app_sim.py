@@ -67,7 +67,7 @@ def scatterplot_from_multiple_terms(df, selected_terms, mode):
         fig.add_trace(go.Scatter(
             x=term_df['date'],
             y=term_df['normalized_similarity'],  
-            mode="markers",
+            mode=mode,
             customdata=term_df[['id', 'year', 'month', 'similarity', 'wrapped_chunk', 'company', 'industry']],
             hovertemplate="<b>ID:</b> %{customdata[0]}<br>"
                         "<b>Year:</b> %{customdata[1]}<br>"
