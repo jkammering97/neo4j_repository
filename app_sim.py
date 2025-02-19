@@ -145,8 +145,14 @@ st.markdown(
     }
     
     /* Reduce font size inside the dropdown search box */
-    div[data-baseweb="select"] > div {
-        font-size: 8px !important; /* Adjust size */
+    div[data-baseweb="select"] {
+        font-size: 10px !important; /* Adjust dropdown option size */
+    }
+
+    /* Fix the size of the 'X' remove button */
+    div[data-baseweb="tag"] svg {
+        width: 14px !important; /* Make 'X' button normal size */
+        height: 14px !important;
     }
     </style>
     """,
