@@ -76,8 +76,13 @@ def scatterplot_from_multiple_terms(df, selected_terms):
                         "<b>Company:</b> %{customdata[5]}<br>"
                         "<b>Industry:</b> %{customdata[6]}<br>",
             line=dict(shape="spline", smoothing=0.3, width=2, color=term_color_map[term]),
-            name=f"Similarity for {term}"
+            name="<br>".join(textwrap.wrap(f"Similarity for {term}", width=30))  # Wrap legend text
         ))
+
+    # Dynamically adjust width based on number of years
+    num_years = df["year"].nunique()
+    base_width = 300 + num_years * 50  # Adjust width dynamically
+    width = min(base_width, 1200)  # Cap width to prevent excessive stretching
 
     # Update layout dynamically
     fig.update_layout(
