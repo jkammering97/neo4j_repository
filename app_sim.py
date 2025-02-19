@@ -136,15 +136,6 @@ n_chunks_per_year = st.sidebar.selectbox("please select the number of chunks to 
 
 years = list(range(start_year, end_year + 1))  # Generate all years in between
 
-if "plot_mode" not in st.session_state:
-    st.session_state.plot_mode = "Markers"
-
-    plot_mode = st.radio(
-        "Select Plot Mode:", 
-        ["Lines", "Markers"], 
-        index=1 if st.session_state.plot_mode == "Markers" else 0
-    )
-
 if st.sidebar.button("Analyze"):
     st.sidebar.write(f"Fetching embeddings for: {', '.join(selected_terms)}...")
     all_results = []
