@@ -109,8 +109,8 @@ st.set_page_config(layout="wide", page_title="Neo4j Term Similarity", page_icon=
 st.sidebar.header("Select Terms for Similarity Analysis")
 
 # Load glossary terms from the embedded dataset
-df_tfnd_glossary_2023 = pd.read_csv("data/df_tfnd_glossary_2023_embedded.csv")
-df_tfnd_glossary_2023["embedding"] = df_tfnd_glossary_2023["embedding"].apply(lambda x: np.array(eval(x), dtype=np.float32))
+df_tfnd_glossary_2023 = pd.read_json("data/df_tfnd_glossary_2023_embedded.json", orient="records")
+df_tfnd_glossary_2023["embedding"] = df_tfnd_glossary_2023["embedding"].apply(lambda x: np.array(x, dtype=np.float32))
 
 glossary_terms = df_tfnd_glossary_2023['Term'].unique()
 
