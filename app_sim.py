@@ -89,7 +89,7 @@ def scatterplot_from_multiple_terms(df, selected_terms, mode):
                 x=mean_df["date"],
                 y=mean_df["normalized_similarity"],
                 mode="lines",
-                line=dict(shape="spline", smoothing=0.3, width=2, color=term_color_map[term]),
+                line=dict(shape="spline", smoothing=0.1, width=1, color=term_color_map[term]),
                 name=f"Mean Similarity for {term}",
                 hoverinfo="skip"  # Avoid hover clutter
             ))
