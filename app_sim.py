@@ -148,18 +148,26 @@ if st.sidebar.button("Analyze"):
 
     # Fetch chunks once per term, only if not already in session state
     for term, term_embedding in term_embeddings.items():
-        if term in st.session_state.term_results_cache and st.session_state.term_results_cache[term]["contains"] == contains:
-            st.sidebar.success(f"Using cached data for: {term} (contains={contains})")
-            df_results = st.session_state.term_results_cache[term]["data"]
-        else:
-            st.sidebar.write(f"Fetching new data for: {term} (contains={contains})...")
-            df_results = fetch_chunks_for_term_for_years(years, term, term_embedding, contains,chunks_per_year=n_chunks_per_year)
+        # Define cache key for the term
+        cache_key = f"{term}_{contains}_{start_year}_{end_year}_{n_chunks_per_year}"
 
-        #  Store both the data and the contains state in cache
-        st.session_state.term_results_cache[term] = {
-            "data": df_results,
-            "contains": contains
-        }
+        # Check if cached data exists and matches all parameters
+        cached_data = st.session_state.term_results_cache.get(cache_key)
+
+        if cached_data:
+            df_results = cached_data["data"]
+        else:
+            st.sidebar.write(f"Fetching new data for: {term}...")
+            df_results = fetch_chunks_for_term_for_years(years, term, term_embedding, contains, chunks_per_year=n_chunks_per_year)
+
+            # Store in session cache
+            st.session_state.term_results_cache[cache_key] = {
+                "data": df_results,
+                "contains": contains,
+                "start_year": start_year,
+                "end_year": end_year,
+                "n_chunks_per_year": n_chunks_per_year
+            }
 
         # Convert dictionary to DataFrame
         df_results = pd.DataFrame(df_results)
