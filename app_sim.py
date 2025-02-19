@@ -219,7 +219,7 @@ if st.sidebar.button("Analyze"):
     if "month" not in df_all_terms.columns:
         st.write(df_all_terms.head())
         st.stop()
-    st.session_state.df_all_terms = pd.concat(all_results, ignore_index=True)
+    st.session_state.df_all_terms = df_all_terms
 
 # Ensure mode selection persists
 if "plot_mode" not in st.session_state:
