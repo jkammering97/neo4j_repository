@@ -63,10 +63,11 @@ def scatterplot_from_multiple_terms(df, selected_terms, mode):
 
         term_df = term_df.sort_values(["year", "month"])
 
+        # Add Markers
         fig.add_trace(go.Scatter(
             x=term_df['date'],
             y=term_df['normalized_similarity'],  
-            mode="lines" if mode == "Lines" else "markers",
+            mode="markers",
             customdata=term_df[['id', 'year', 'month', 'similarity', 'wrapped_chunk', 'company', 'industry']],
             hovertemplate="<b>ID:</b> %{customdata[0]}<br>"
                         "<b>Year:</b> %{customdata[1]}<br>"
@@ -75,10 +76,23 @@ def scatterplot_from_multiple_terms(df, selected_terms, mode):
                         "<b>Statement:</b> %{customdata[4]}<br>"
                         "<b>Company:</b> %{customdata[5]}<br>"
                         "<b>Industry:</b> %{customdata[6]}<br>",
-            line=dict(shape="spline", smoothing=0.3, width=2, color=term_color_map[term]) if mode == "Lines" else None,
-            marker=dict(size=5, opacity=0.6) if mode == "Markers" else None,
-            name="<br>".join(textwrap.wrap(f"Similarity for {term}", width=30))  # Wrap legend text
+            marker=dict(size=5, opacity=0.6, color=term_color_map[term]),
+            name=f"Similarity for {term}"
         ))
+
+        # Add Mean Similarity Line (Only for Markers Mode)
+        if mode == "Markers":
+            mean_df = term_df.groupby("year")["normalized_similarity"].mean().reset_index()
+            mean_df["date"] = mean_df["year"].astype(str) + "-01"  # Keep consistent x-axis format
+
+            fig.add_trace(go.Scatter(
+                x=mean_df["date"],
+                y=mean_df["normalized_similarity"],
+                mode="lines",
+                line=dict(shape="spline", smoothing=0.3, width=2, color=term_color_map[term]),
+                name=f"Mean Similarity for {term}",
+                hoverinfo="skip"  # Avoid hover clutter
+            ))
 
     # Dynamically adjust width based on number of years
     num_years = df["year"].nunique()
@@ -92,8 +106,8 @@ def scatterplot_from_multiple_terms(df, selected_terms, mode):
         xaxis=dict(
             title="<b>Year</b>",
             tickmode="array",
-            tickvals=[f"{y}-01" for y in df["year"].unique()],  # Use correct loop variable
-            ticktext=[str(y) for y in df["year"].unique()],  # Fixed: Use 'y' instead of 'year'
+            tickvals=[f"{y}-01" for y in df["year"].unique()],  
+            ticktext=[str(y) for y in df["year"].unique()],  
             tickangle=0,
             color=text_color,
             title_font=dict(size=18),
