@@ -146,7 +146,7 @@ st.markdown(
     
     /* Reduce font size inside the dropdown search box */
     div[data-baseweb="select"] > div {
-        font-size: 12px !important; /* Adjust size */
+        font-size: 8px !important; /* Adjust size */
     }
     </style>
     """,
