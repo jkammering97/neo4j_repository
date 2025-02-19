@@ -5,6 +5,8 @@ from neo4j import GraphDatabase
 import numpy as np
 from numpy.linalg import norm
 import pandas as pd
+from sentence_transformers import SentenceTransformer
+  
 
 import streamlit as st
 
@@ -15,20 +17,23 @@ import plotly.express as px
 import textwrap
 #%%
 
-def initialize():
+def initialize(streamlit_secret=True):
     """Initialize the Neo4j driver using Streamlit secrets for deployment."""
-    
-    # First, check if credentials are in Streamlit Secrets (for Streamlit Cloud)
-    if "connections" in st.secrets:
-        URI = st.secrets["connections"]["NEO4J_URI"]
-        USERNAME = st.secrets["connections"]["USERNAME"]
-        PASSWORD = st.secrets["connections"]["DB_PASSWORD"]
-    else:
-        # If not using Streamlit Cloud, fall back to environment variables
-        URI = os.environ.get("NEO4J_URI")
-        USERNAME = os.environ.get("USERNAME")
-        PASSWORD = os.environ.get("DB_PASSWORD")
-
+    if streamlit_secret == False:
+        URI = os.getenv("NEO4J_URI")
+        USERNAME = os.getenv("USERNAME")
+        PASSWORD = os.getenv("DB_PASSWORD")
+    else: # if using streamlit secrets
+        # First, check if credentials are in Streamlit Secrets (for Streamlit Cloud)
+        if "connections" in st.secrets:
+            URI = st.secrets["connections"]["NEO4J_URI"]
+            USERNAME = st.secrets["connections"]["USERNAME"]
+            PASSWORD = st.secrets["connections"]["DB_PASSWORD"]
+        else:
+            # If not using Streamlit Cloud, fall back to environment variables
+            URI = os.environ.get("NEO4J_URI")
+            USERNAME = os.environ.get("USERNAME")
+            PASSWORD = os.environ.get("DB_PASSWORD")
     # Suppress warnings from Neo4j logs
     import logging
     logging.getLogger("neo4j").setLevel(logging.ERROR)
@@ -65,65 +70,7 @@ def compare_glossary_to_statements(glossary_embedding, n=10):
     driver.close()
     return similar_statements
 
-
-# def make_yrl_query(year, glossary_embedding, chunks_per_year=400, batch_size=100):
-
-    driver = initialize()
-
-    # Function to fetch chunks in batches
-    def fetch_batch(session, batch_ids):
-        batch_query = """
-        MATCH (c:Chunk) WHERE id(c) IN $batch_ids
-        // Get the year, company, and industry of the chunks
-        MATCH (c)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)<-[:ARRANGED]-(co:Company)-[:IN_INDUSTRY]->(i:Industry)
-        RETURN id(c) AS id, c.embedding AS embedding, substring(s.text, c.start_index, c.end_index - c.start_index+1) AS chunk_text,
-               s.name AS name, e.year AS year, co.name AS company, i.name AS industry
-        ORDER BY year DESC
-        """
-
-        results = session.run(batch_query, batch_ids=batch_ids)
-        return [dict(record) for record in results]
-
-    with driver.session() as session:
-        # Get IDs of all chunks containing the year
-
-        # id_query_old = """
-        # CALL db.index.vector.queryNodes('chunk_embeddings', $n, $glossary_embedding)
-        # YIELD node AS similarChunk, score
-        # MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
-        # WHERE e.year = $year
-        # RETURN id(similarChunk) AS chunk_id, id(s) AS statement_id, s.text AS statement, e.year AS year, score
-        # ORDER BY score DESC
-        # """
-        id_query = """
-        CALL db.index.vector.queryNodes('chunk_embeddings', $n, $glossary_embedding)
-        YIELD node AS similarChunk, score
-        MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
-        WHERE datetime(e.time).year = $year AND datetime(e.time).month = $month
-        RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
-            s.text AS statement, datetime(e.time).year AS year, 
-            datetime(e.time).month AS month, score
-        ORDER BY score DESC
-        """
-        ids = [record["chunk_id"] for record in session.run(id_query, year=year, n=chunks_per_year, glossary_embedding=glossary_embedding)]
-
-        total_ids = len(ids)
-
-        chunks = []
-        for i in range(0, total_ids, batch_size):
-            batch_ids = ids[i:i + batch_size]
-            batch_chunks = fetch_batch(session, batch_ids)
-            # Convert embedding to numpy array and append to chunks list
-            for chunk in batch_chunks:
-                chunk['embedding'] = np.array(chunk['embedding'], dtype=np.float32)
-                chunk['year'] = year
-                chunks.append(chunk)
-            
-    driver.close()
-    print(f'processing size {len(chunks)} for year {year}')
-    return chunks
-
-# def make_yrl_query(year, month, glossary_embedding, chunks_per_month=400, batch_size=100):
+def make_yrl_query_old(year, month, glossary_embedding, chunks_per_month=400, batch_size=100):
 
     driver = initialize()
 
@@ -220,8 +167,17 @@ def make_yrl_query(year, glossary_embedding, chunks_per_year=250, batch_size=100
     return chunks
 
 @st.cache_data(show_spinner=True)
-def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, chunks_per_year=50, batch_size=200):
-    driver = initialize()
+def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, streamlit_secret=True, chunks_per_year=50, batch_size=200):
+    """makes two calls to the NEO4J database based on the term and its glossary embedding:
+    * _id_query:_ query for chunks of the ECC transcripts that are semantically similar to the search term:
+        * uses vector search to find similar text chunks either by 
+            * cosine similarity or 
+            * using CONTAINS for an explicit search query
+    * _fetch_batch:_ gets the additional information about the queried data including: 
+        * [company, industry, year and month of the conference]
+    """
+    
+    driver = initialize(streamlit_secret=streamlit_secret)
 
     with driver.session() as session:
         term_filter = "AND s.text CONTAINS $term" if contains == "yes" else ""
@@ -431,114 +387,3 @@ def scatterplot_from_cosine_similarity(yrl_df, term, term_embedding, normalized_
     fig.show()
 
 #%%
-# df_tfnd_glossary_2023 = pd.read_csv("data/df_tfnd_glossary_2023_embedded.csv")
-# # Convert embedding column back to NumPy arrays
-# df_tfnd_glossary_2023["embedding"] = df_tfnd_glossary_2023["embedding"].apply(lambda x: np.array(eval(x), dtype=np.float32))
-# #%%
-# term_array = df_tfnd_glossary_2023[df_tfnd_glossary_2023['Term']=='Biodiversity offsets']
-# embedding = term_array['embedding'].values
-# embedding = df_tfnd_glossary_2023.loc[53]['embedding']
-# term = df_tfnd_glossary_2023.loc[53]['Term']
-
-# time_frame = [2015,2016,2017,2018,2019,2020,2021,2022,2023]
-# yrl_results = fetch_chunks_for_term_for_years(time_frame, embedding)
-# yrl_results_flattened = flatten_embeddings(yrl_results)
-# #%%
-
-# # calculate here to get a better gauge of similarity before umap dim. reduction:
-# compute_term_dist_cosine(yrl_results_flattened, embedding)
-# #%%
-# # lower dimensionality of the data for 2D representation:
-# embeddings_array = np.array(yrl_results_flattened["embedding"].tolist())
-# # train umap on embeddings
-# umap_reducer = fit_umap_model(embeddings_array)
-
-# # Reduce embeddings - ensure correct shape
-# embedding_reduced = umap_reducer.transform(embeddings_array)
-
-# # Assign reduced embeddings to DataFrame (without flattening incorrectly)
-# yrl_results_flattened["embedding_reduced"] = embedding_reduced[:, 0]  # Select only the first component if using 1D UMAP
-
-# # for the search term:
-# term_embedding_value = umap_reducer.transform([df_tfnd_glossary_2023.loc[53]['embedding']])[0, 0]
-
-# #%%
-# # Assume `df_yrl_terms` contains chunk embeddings per year
-# # and `term_embedding_value` is the projected embedding of the actual term
-
-# yrl_results_flattened["deviation"] = yrl_results_flattened["embedding_reduced"].apply(lambda x: abs(x - term_embedding_value))
-
-# # Compute mean and standard deviation of deviations for each year
-# df_variance = yrl_results_flattened.groupby("year")["deviation"].agg(["mean", "std"]).reset_index()
-
-# yrl_results_flattened["deviation"] = yrl_results_flattened["deviation"].round(2)
-# # Compute mean and standard deviation of deviation per year
-# df_variance = yrl_results_flattened.groupby("year")["deviation"].agg(["mean", "std"]).reset_index()
-
-# # Normalize a numerical column (e.g., deviation)
-# normalized_sizes = (yrl_results_flattened["deviation"] - yrl_results_flattened["deviation"].min()) / (
-#     yrl_results_flattened["deviation"].max() - yrl_results_flattened["deviation"].min()
-# ) * 10 + 5  # Scale sizes between 5 and 15
-
-# # Convert to list for plotly
-# normalized_sizes = normalized_sizes.tolist()
-#%%
-# scatterplot_from_embeddings(yrl_results_flattened,term,term_embedding_value,normalized_sizes)
-# %%
-# scatterplot_from_cosine_similarity(yrl_results_flattened,term,term_embedding_value,normalized_sizes)
-
-# %%
-def scatterplot_streamlit(df, term):
-    """Creates a scatter plot showing similarity-based deviation over time with app_sim.py styling"""
-
-    df["wrapped_chunk"] = df["chunk"].apply(lambda x: "<br>".join(textwrap.wrap(x, 50)))
-
-    # Normalize similarity scores for marker size scaling
-    normalized_sizes = (df["similarity"] - df["similarity"].min()) / (df["similarity"].max() - df["similarity"].min()) * 10 + 5
-
-    # Scatter plot for all embeddings
-    trace_all = go.Scattergl(
-        x=df['year'],
-        y=df['deviation'],  
-        mode='markers',
-        customdata=df[['id', 'similarity', 'wrapped_chunk']],
-        hovertemplate="<b>ID:</b> %{customdata[0]}<br>"
-                      "<b>Similarity:</b> %{customdata[1]:.3f}<br>"
-                      "<b>Statement:</b> %{customdata[2]}<br>",
-        marker=dict(
-            size=normalized_sizes,  # Dynamically adjust marker size
-            opacity=0.7,
-            color=df["similarity"],  # Color gradient based on similarity
-            colorscale="blues",
-            showscale=True
-        ),
-        name="Chunk Embeddings"
-    )
-
-    # Scatter plot for the actual term embedding
-    trace_term = go.Scattergl(
-        x=df["year"],
-        y=[0] * len(df["year"]),
-        mode="markers",
-        marker=dict(size=14, color="limegreen", symbol="diamond", line=dict(width=2, color="black")),
-        name=f"{term} Term Embedding"
-    )
-
-    # Create final figure
-    fig = go.Figure(data=[trace_all, trace_term])
-
-    # Update layout with `app_sim.py` styling
-    fig.update_layout(
-        title=f"<b>Similarity-Based Deviation Over Time vs. {term}</b>",
-        title_font=dict(size=18, family="Arial", color="white"),
-        xaxis=dict(title="<b>Year</b>", tickmode="linear", dtick=1, color="white"),
-        yaxis=dict(title="<b>Deviation from Term (1 - Similarity)</b>", color="white"),
-        hovermode="closest",
-        plot_bgcolor="black",
-        paper_bgcolor="black",
-        font=dict(family="Arial", size=12, color="white"),
-        legend=dict(font=dict(color="white"))
-    )
-
-    # Display the figure in Streamlit
-    st.plotly_chart(fig)        
