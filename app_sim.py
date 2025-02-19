@@ -81,15 +81,21 @@ def scatterplot_from_multiple_terms(df, selected_terms, mode):
         ))
 
         # Add Mean Similarity Line (Only for Markers Mode)
+        # Add Mean Similarity Line (Only for Markers Mode)
         if mode == "Markers":
             mean_df = term_df.groupby("year")["normalized_similarity"].mean().reset_index()
             mean_df["date"] = mean_df["year"].astype(str) + "-01"  # Keep consistent x-axis format
+
+            # Ensure the last year is included, even if it had missing data
+            all_years = pd.DataFrame({"year": df["year"].unique()})  # Get all years from dataset
+            mean_df = all_years.merge(mean_df, on="year", how="left").fillna(method="ffill")  # Forward fill missing values
+            mean_df["date"] = mean_df["year"].astype(str) + "-01"  # Reapply date format
 
             fig.add_trace(go.Scatter(
                 x=mean_df["date"],
                 y=mean_df["normalized_similarity"],
                 mode="lines",
-                line=dict(shape="spline", smoothing=0.1, width=1, color=term_color_map[term]),
+                line=dict(shape="spline", smoothing=0.3, width=2, color=term_color_map[term]),
                 name=f"Mean Similarity for {term}",
                 hoverinfo="skip"  # Avoid hover clutter
             ))
