@@ -136,6 +136,15 @@ n_chunks_per_year = st.sidebar.selectbox("please select the number of chunks to 
 
 years = list(range(start_year, end_year + 1))  # Generate all years in between
 
+if "plot_mode" not in st.session_state:
+    st.session_state.plot_mode = "Markers"
+
+    plot_mode = st.radio(
+        "Select Plot Mode:", 
+        ["Lines", "Markers"], 
+        index=1 if st.session_state.plot_mode == "Markers" else 0
+    )
+
 if st.sidebar.button("Analyze"):
     st.sidebar.write(f"Fetching embeddings for: {', '.join(selected_terms)}...")
     all_results = []
@@ -217,6 +226,16 @@ if st.sidebar.button("Analyze"):
         st.write(df_all_terms.head())
         st.error("Month column is missing! Check data fetching.")
         st.stop()
-    plot_mode = st.radio("Select Plot Mode:", ["Lines", "Markers"], index=1)
-    # Plot results
-    scatterplot_from_multiple_terms(df_all_terms, selected_terms, plot_mode)
+
+    
+    # Check if we have stored data before rendering
+    if st.session_state.df_all_terms is not None:
+        # If the mode changes, only rerender the graph
+        if plot_mode != st.session_state.plot_mode:
+            st.session_state.plot_mode = plot_mode
+            st.rerun()
+
+        # Render graph with cached data
+        scatterplot_from_multiple_terms(st.session_state.df_all_terms, selected_terms, plot_mode)
+    else:
+        st.warning("Click 'Analyze' to fetch data before visualizing.")
