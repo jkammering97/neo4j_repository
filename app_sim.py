@@ -32,16 +32,16 @@ def compute_deviation(df):
     df["deviation"] = 1 - df["similarity"]  # Higher similarity = lower deviation
     return df
 
-def scatterplot_from_multiple_terms(df, selected_terms):
+def scatterplot_from_multiple_terms(df, selected_terms, mode):
     """Creates a scatter plot showing similarity over time for multiple terms, adapting to Streamlit's theme."""
 
     # Detect Streamlit theme (light or dark)
     theme = st.get_option("theme.base")
     if theme is None:
-        theme = "dark"  # Force dark mode as a default
+        theme = "dark"  # Default to dark mode
     # Set colors based on theme
     if theme == "dark":
-        bg_color = "#1E1E1E"  # Replace this with the exact extracted color
+        bg_color = "#1E1E1E"
         text_color = "white"
         line_colors = px.colors.qualitative.Set1
     else:
@@ -66,7 +66,7 @@ def scatterplot_from_multiple_terms(df, selected_terms):
         fig.add_trace(go.Scatter(
             x=term_df['date'],
             y=term_df['normalized_similarity'],  
-            mode='lines',
+            mode="lines" if mode == "Lines" else "markers",
             customdata=term_df[['id', 'year', 'month', 'similarity', 'wrapped_chunk', 'company', 'industry']],
             hovertemplate="<b>ID:</b> %{customdata[0]}<br>"
                         "<b>Year:</b> %{customdata[1]}<br>"
@@ -75,7 +75,8 @@ def scatterplot_from_multiple_terms(df, selected_terms):
                         "<b>Statement:</b> %{customdata[4]}<br>"
                         "<b>Company:</b> %{customdata[5]}<br>"
                         "<b>Industry:</b> %{customdata[6]}<br>",
-            line=dict(shape="spline", smoothing=0.3, width=2, color=term_color_map[term]),
+            line=dict(shape="spline", smoothing=0.3, width=2, color=term_color_map[term]) if mode == "Lines" else None,
+            marker=dict(size=5, opacity=0.6) if mode == "Markers" else None,
             name="<br>".join(textwrap.wrap(f"Similarity for {term}", width=30))  # Wrap legend text
         ))
 
@@ -90,7 +91,7 @@ def scatterplot_from_multiple_terms(df, selected_terms):
         title_font=dict(size=22, family="Arial", color=text_color),
         xaxis=dict(title="<b>Year</b>", tickmode="array",
                    tickvals=[f"{year}-01" for year in df["year"].unique()],
-                   ticktext=[str(year) for year in df["year"].unique()],
+                   ticktext=[str(year) for y in df["year"].unique()],
                    tickangle=0, color=text_color, title_font=dict(size=18)),
         yaxis=dict(title="<b>Similarity (1 = Term Embedding)</b>", range=[0, 1.1], 
                    color=text_color, title_font=dict(size=18)),
@@ -212,6 +213,6 @@ if st.sidebar.button("Analyze"):
         st.write(df_all_terms.head())
         st.error("Month column is missing! Check data fetching.")
         st.stop()
-
+    plot_mode = st.radio("Select Plot Mode:", ["Lines", "Markers"], index=1)
     # Plot results
-    scatterplot_from_multiple_terms(df_all_terms, selected_terms)
+    scatterplot_from_multiple_terms(df_all_terms, selected_terms, plot_mode)
