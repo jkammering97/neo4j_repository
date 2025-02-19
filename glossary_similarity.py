@@ -6,7 +6,6 @@ import numpy as np
 from numpy.linalg import norm
 import pandas as pd
 from sentence_transformers import SentenceTransformer
-  
 
 import streamlit as st
 
@@ -166,7 +165,7 @@ def make_yrl_query(year, glossary_embedding, chunks_per_year=250, batch_size=100
     print(f'Processing size {len(chunks)} for year {year}')
     return chunks
 
-@st.cache_data(show_spinner=True)
+# @st.cache_data(show_spinner=True)
 def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, streamlit_secret=True, chunks_per_year=50, batch_size=200):
     """makes two calls to the NEO4J database based on the term and its glossary embedding:
     * _id_query:_ query for chunks of the ECC transcripts that are semantically similar to the search term:
@@ -187,7 +186,7 @@ def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, s
         YIELD node AS similarChunk, score
         MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
         WHERE datetime(e.time).year IN $years
-        AND size(s.text) > 15  // Adjust length requirement here
+        AND size(s.text) > 25  // Adjust length requirement here
         {term_filter}  
         RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
             s.text AS statement, datetime(e.time).year AS year, 

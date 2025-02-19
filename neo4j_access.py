@@ -1,6 +1,6 @@
 from langchain_community.vectorstores import Neo4jVector
-import pandas as pd
 from neo4j import GraphDatabase
+import pandas as pd
 import os
 import time
 from dotenv import load_dotenv
@@ -98,7 +98,6 @@ class QueryNeo4J:
         print(cls.df)
 
         return cls.df
-
 
 if __name__ == "__main__":
     QueryNeo4J.initialize()
