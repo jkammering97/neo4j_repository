@@ -138,15 +138,21 @@ st.sidebar.header("Select Terms for Similarity Analysis")
 st.markdown(
     """
     <style>
-    /* Reduce font size of selected terms */
+    /* Reduce font size of selected terms in the dropdown */
     div[data-baseweb="tag"] {
-        font-size: 12px !important; /* Adjust size as needed */
-        white-space: nowrap; /* Prevent text from wrapping */
+        font-size: 12px !important; /* Adjust size */
+        white-space: nowrap; /* Prevent wrapping */
+    }
+    
+    /* Reduce font size inside the dropdown search box */
+    div[data-baseweb="select"] > div {
+        font-size: 12px !important; /* Adjust size */
     }
     </style>
     """,
     unsafe_allow_html=True
 )
+
 
 # Load glossary terms from the embedded dataset
 df_tfnd_glossary_2023 = pd.read_json("data/df_tfnd_glossary_2023_embedded.json", orient="records")
