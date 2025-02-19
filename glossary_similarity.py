@@ -165,7 +165,7 @@ def make_yrl_query(year, glossary_embedding, chunks_per_year=250, batch_size=100
     print(f'Processing size {len(chunks)} for year {year}')
     return chunks
 
-# @st.cache_data(show_spinner=True)
+@st.cache_data(show_spinner=True)
 def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, streamlit_secret=True, chunks_per_year=50, batch_size=200):
     """makes two calls to the NEO4J database based on the term and its glossary embedding:
     * _id_query:_ query for chunks of the ECC transcripts that are semantically similar to the search term:
