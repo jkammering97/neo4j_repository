@@ -10,19 +10,6 @@ import os
 
 # Import functions from glossary_similarity.py
 from glossary_similarity import fetch_chunks_for_term_for_years, fetch_chunks_for_term_for_years, compute_term_dist_cosine
-st.markdown(
-    """
-    <style>
-    /* Reduce font size of selected terms */
-    div[data-baseweb="tag"] {
-        font-size: 12px !important; /* Adjust size as needed */
-        white-space: nowrap; /* Prevent text from wrapping */
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
 
 ### **Neo4j Initialization**
 def init_graph_DB():
@@ -147,6 +134,19 @@ if "df_all_terms" not in st.session_state:
 st.set_page_config(layout="wide", page_title="Neo4j Term Similarity", page_icon='📖')
 
 st.sidebar.header("Select Terms for Similarity Analysis")
+
+st.markdown(
+    """
+    <style>
+    /* Reduce font size of selected terms */
+    div[data-baseweb="tag"] {
+        font-size: 12px !important; /* Adjust size as needed */
+        white-space: nowrap; /* Prevent text from wrapping */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 # Load glossary terms from the embedded dataset
 df_tfnd_glossary_2023 = pd.read_json("data/df_tfnd_glossary_2023_embedded.json", orient="records")
