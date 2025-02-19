@@ -148,20 +148,6 @@ st.markdown(
     div[data-baseweb="select"] {
         font-size: 10px !important; /* Adjust dropdown option size */
     }
-
-    /* Fix the size of the 'X' remove button */
-    div[data-baseweb="tag"] svg {
-        width: 14px !important; /* Make 'X' button normal size */
-        height: 14px !important;
-    }
-    [data-testid="stSidebar"][aria-expanded="true"] > div:first-child {
-        width: 500px;
-    }
-    [data-testid="stSidebar"][aria-expanded="false"] > div:first-child {
-        width: 500px;
-        margin-left: -500px;
-    }
-
     </style>
     """,
     unsafe_allow_html=True
