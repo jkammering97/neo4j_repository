@@ -227,15 +227,24 @@ if st.sidebar.button("Analyze"):
         st.error("Month column is missing! Check data fetching.")
         st.stop()
 
-    
-    # Check if we have stored data before rendering
-    if st.session_state.df_all_terms is not None:
-        # If the mode changes, only rerender the graph
-        if plot_mode != st.session_state.plot_mode:
-            st.session_state.plot_mode = plot_mode
-            st.rerun()
+if "plot_mode" not in st.session_state:
+    st.session_state.plot_mode = "Markers"
 
-        # Render graph with cached data
-        scatterplot_from_multiple_terms(st.session_state.df_all_terms, selected_terms, plot_mode)
-    else:
-        st.warning("Click 'Analyze' to fetch data before visualizing.")
+# UI: Radio button for selecting plot mode
+plot_mode = st.radio(
+    "Select Plot Mode:", 
+    ["Lines", "Markers"], 
+    index=1 if st.session_state.plot_mode == "Markers" else 0
+)
+
+# If the mode changes, update session state and rerun
+if plot_mode != st.session_state.plot_mode:
+    st.session_state.plot_mode = plot_mode
+    st.rerun()
+
+# Check if we have stored data before rendering
+if "df_all_terms" in st.session_state and st.session_state.df_all_terms is not None:
+    # Render graph with cached data
+    scatterplot_from_multiple_terms(st.session_state.df_all_terms, selected_terms, st.session_state.plot_mode)
+else:
+    st.warning("Click 'Analyze' to fetch data before visualizing.")
