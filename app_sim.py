@@ -38,15 +38,15 @@ def scatterplot_from_multiple_terms(df, selected_terms, mode):
     # Detect Streamlit theme (light or dark)
     theme = st.get_option("theme.base")
     if theme is None:
-        theme = "dark"  # Default to dark mode
+        theme = "light"  # Default to dark mode
     # Set colors based on theme
     if theme == "dark":
-        bg_color = "#1E1E1E"
-        text_color = "white"
+        bg_color = "#0E1117"
+        text_color = "#FAFAFA"
         line_colors = px.colors.qualitative.Set1
     else:
-        bg_color = "white"
-        text_color = "black"
+        bg_color = "#FFFFFF"
+        text_color = "#31333F"
         line_colors = px.colors.qualitative.Set2
 
     # Assign unique colors for each term
