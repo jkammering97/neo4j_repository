@@ -89,12 +89,16 @@ def scatterplot_from_multiple_terms(df, selected_terms, mode):
     fig.update_layout(
         title="<b>Similarity Over Time for Multiple Terms</b>",
         title_font=dict(size=22, family="Arial", color=text_color),
-        xaxis=dict(title="<b>Year</b>", tickmode="array",
-                   tickvals=[f"{year}-01" for year in df["year"].unique()],
-                   ticktext=[str(year) for y in df["year"].unique()],
-                   tickangle=0, color=text_color, title_font=dict(size=18)),
-        yaxis=dict(title="<b>Similarity (1 = Term Embedding)</b>", range=[0, 1.1], 
-                   color=text_color, title_font=dict(size=18)),
+        xaxis=dict(
+            title="<b>Year</b>",
+            tickmode="array",
+            tickvals=[f"{y}-01" for y in df["year"].unique()],  # Use correct loop variable
+            ticktext=[str(y) for y in df["year"].unique()],  # Fixed: Use 'y' instead of 'year'
+            tickangle=0,
+            color=text_color,
+            title_font=dict(size=18),
+        ),
+        yaxis=dict(title="<b>Similarity (1 = Term Embedding)</b>", range=[0, 1.1], color=text_color, title_font=dict(size=18)),
         hovermode="closest",
         plot_bgcolor=bg_color,
         paper_bgcolor=bg_color,
