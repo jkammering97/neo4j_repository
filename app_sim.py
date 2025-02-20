@@ -132,7 +132,7 @@ if "df_all_terms" not in st.session_state:
     st.session_state.df_all_terms = None  # Ensure the dataset is stored
 
 st.set_page_config(layout="wide", page_title="Neo4j Term Similarity", page_icon='📖')
-
+# comment
 st.sidebar.header("Select Terms for Similarity Analysis")
 
 # Load glossary terms from the embedded dataset
