@@ -15,8 +15,12 @@ import plotly.graph_objects as go
 import plotly.express as px
 import textwrap
 #%%
+def load_biodiversity_embed():
+    df_tfnd_glossary_2023 = pd.read_json("data/df_tfnd_glossary_2023_embedded.json", orient="records")
+    df_tfnd_glossary_2023["embedding"] = df_tfnd_glossary_2023["embedding"].apply(lambda x: np.array(x, dtype=np.float32))
+    return df_tfnd_glossary_2023[df_tfnd_glossary_2023['Term']=='Biodiversity']
 
-def initialize(streamlit_secret=True):
+def initialize(streamlit_secret=True, with_bio=False):
     """Initialize the Neo4j driver using Streamlit secrets for deployment."""
     if streamlit_secret == False:
         URI = os.getenv("NEO4J_URI")
@@ -38,36 +42,12 @@ def initialize(streamlit_secret=True):
     logging.getLogger("neo4j").setLevel(logging.ERROR)
     if not URI or not USERNAME or not PASSWORD:
         raise ValueError("Neo4j credentials are missing! Ensure they are set in GitHub Secrets or your .env file.")
-
-    return GraphDatabase.driver(URI, auth=(USERNAME, PASSWORD))
-
-def compare_glossary_to_statements(glossary_embedding, n=10):
-    """Finds the most similar database statements for a given glossary term embedding."""
-
-    driver = initialize()
-    similar_statements = []
-
-    with driver.session() as session:
-        # Neo4j vector similarity query
-        result = session.run("""
-            CALL db.index.vector.queryNodes('chunk_embeddings', $n, $glossary_embedding)
-            YIELD node AS similarStatement, score
-            MATCH (similarStatement)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
-            RETURN id(similarStatement) AS id, s.text AS statement, e.year AS year, score
-            ORDER BY score DESC
-            """, n=n, glossary_embedding=glossary_embedding.tolist())
-
-        # Collect results
-        for record in result:
-            similar_statements.append({
-                'id': record['id'],
-                'statement': record['statement'],
-                'score': record['score'],
-                'year': record['year']
-            })
-
-    driver.close()
-    return similar_statements
+    if with_bio:
+        biodiversity_embedding = load_biodiversity_embed()
+        print('returning biodiv also')
+        return GraphDatabase.driver(URI, auth=(USERNAME, PASSWORD)), biodiversity_embedding
+    else:
+        return GraphDatabase.driver(URI, auth=(USERNAME, PASSWORD))
 
 def make_yrl_query_old(year, month, glossary_embedding, chunks_per_month=400, batch_size=100):
 
@@ -165,7 +145,7 @@ def make_yrl_query(year, glossary_embedding, chunks_per_year=250, batch_size=100
     print(f'Processing size {len(chunks)} for year {year}')
     return chunks
 
-@st.cache_data(show_spinner=True)
+# @st.cache_data(show_spinner=True)
 def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, streamlit_secret=True, chunks_per_year=50, batch_size=200):
     """makes two calls to the NEO4J database based on the term and its glossary embedding:
     * _id_query:_ query for chunks of the ECC transcripts that are semantically similar to the search term:
@@ -186,7 +166,7 @@ def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, s
         YIELD node AS similarChunk, score
         MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
         WHERE datetime(e.time).year IN $years
-        AND size(s.text) > 45  // Adjust length requirement here
+        AND size(s.text) > 200  // Adjust length requirement here
         {term_filter}  
         RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
             s.text AS statement, datetime(e.time).year AS year, 
@@ -194,9 +174,12 @@ def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, s
         ORDER BY year DESC, month ASC, score DESC
         """
 
-        ids = [record["chunk_id"] for record in session.run(
+        id_results = session.run(
             id_query, years=years, term=term, n=chunks_per_year, glossary_embedding=glossary_embedding
-        )]
+        )
+
+        id_score_map = {record["chunk_id"]: record["score"] for record in id_results}  # Store chunk_id -> score
+        ids = list(id_score_map.keys())  # Extract the IDs for batch fetching
 
         total_ids = len(ids)
         chunks = []
@@ -220,10 +203,103 @@ def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, s
 
             for chunk in batch_chunks:
                 chunk['embedding'] = np.array(chunk['embedding'], dtype=np.float32)  # Ensure embedding is included
+                chunk['score'] = id_score_map.get(chunk['id'], None)  # Retrieve score from mapping
                 chunks.append(chunk)
 
     driver.close()
 
+    return chunks
+
+def get_biodiversity_subset(years, streamlit_secret=True, chunks_per_year=500):
+    """
+    First filters chunks broadly related to biodiversity, then computes similarity
+    scores to return the most relevant chunks for the given term.
+    """
+
+    driver, biodiversity_embedding = initialize(streamlit_secret=streamlit_secret, with_bio=True)
+
+    with driver.session() as session:
+        ### STEP 1: PRE-FILTER CHUNKS THAT ARE BROADLY RELATED TO BIODIVERSITY ###
+        biodiversity_filter_query = """
+        CALL db.index.vector.queryNodes('chunk_embeddings', $n, $biodiversity_embedding)
+        YIELD node AS chunk, score
+        MATCH (chunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
+        WHERE datetime(e.time).year IN $years
+        AND size(s.text) > 200  // Minimum length filter
+        RETURN elementId(chunk) AS chunk_id, elementId(s) AS statement_id, 
+               s.text AS statement, datetime(e.time).year AS year, 
+               datetime(e.time).month AS month, chunk.embedding AS embedding, score
+        ORDER BY score DESC
+        """
+        biodiversity_results = session.run(
+            biodiversity_filter_query, n=chunks_per_year,years=years, biodiversity_embedding=biodiversity_embedding['embedding'].values[0].tolist()
+        )
+        
+        # Convert results to dictionary for lookup
+        biodiversity_chunks = {record["chunk_id"]: record for record in biodiversity_results}
+        return driver, biodiversity_chunks
+    
+driver, biodiversity_subset = get_biodiversity_subset(chunks_per_year=100000)
+chunks = fetch_chunks_for_term_for_years_biodiv_subset(driver, biodiversity_subset)
+
+def fetch_chunks_for_term_for_years_biodiv_subset(driver, years, term, glossary_embedding, biodiversity_subset, contains=False, streamlit_secret=True, chunks_per_year=50, batch_size=200):
+    """
+    First filters chunks broadly related to biodiversity, then computes similarity
+    scores to return the most relevant chunks for the given term.
+    """
+
+    with driver.session() as session:
+        ### STEP 2: REFINE SEARCH TO FIND THE MOST RELEVANT CHUNKS FOR THE TERM ###
+        term_filter = "AND s.text CONTAINS $term" if contains == "yes" else ""
+
+        id_query = f"""
+        CALL db.index.vector.queryNodes('chunk_embeddings', $n, $glossary_embedding)
+        YIELD node AS similarChunk, score
+        MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
+        WHERE datetime(e.time).year IN $years
+        AND elementId(similarChunk) IN $biodiversity_chunks  // Only keep biodiversity-related chunks
+        {term_filter}  
+        RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
+               s.text AS statement, datetime(e.time).year AS year, 
+               datetime(e.time).month AS month, similarChunk.embedding AS embedding, score
+        ORDER BY year DESC, month ASC, score DESC
+        """
+
+        id_results = session.run(
+            id_query, years=years, term=term, n=chunks_per_year, glossary_embedding=glossary_embedding, 
+            biodiversity_chunks=list(biodiversity_subset.keys())
+        )
+
+        id_score_map = {record["chunk_id"]: record["score"] for record in id_results}
+        ids = list(id_score_map.keys())
+
+        total_ids = len(ids)
+        chunks = []
+
+        ### STEP 3: FETCH ADDITIONAL CHUNK DETAILS ###
+        def fetch_batch(session, batch_ids):
+            batch_query = """
+            MATCH (c:Chunk) WHERE elementId(c) IN $batch_ids
+            MATCH (c)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)<-[:ARRANGED]-(co:Company)-[:IN_INDUSTRY]->(i:Industry)
+            RETURN elementId(c) AS id, c.embedding AS embedding, 
+                   substring(s.text, c.start_index, c.end_index - c.start_index+1) AS chunk_text,
+                   s.name AS name, datetime(e.time).year AS year, datetime(e.time).month AS month, 
+                   co.name AS company, i.name AS industry
+            ORDER BY year DESC, month ASC
+            """
+            results = session.run(batch_query, batch_ids=batch_ids)
+            return [dict(record) for record in results]
+
+        for i in range(0, total_ids, batch_size):
+            batch_ids = ids[i:i + batch_size]
+            batch_chunks = fetch_batch(session, batch_ids)
+
+            for chunk in batch_chunks:
+                chunk['embedding'] = np.array(chunk['embedding'], dtype=np.float32)
+                chunk['score'] = id_score_map.get(chunk['id'], None)  
+                chunks.append(chunk)
+
+    driver.close()
     return chunks
 
 def flatten_embeddings(dict_yrl_results: dict):
