@@ -1,5 +1,5 @@
 #%%
-from neo4j_access import *
+# from legacy.neo4j_access import *
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 import numpy as np
@@ -14,6 +14,7 @@ import umap
 import plotly.graph_objects as go
 import plotly.express as px
 import textwrap
+import os
 #%%
 def load_biodiversity_embed():
     df_tfnd_glossary_2023 = pd.read_json("data/df_tfnd_glossary_2023_embedded.json", orient="records")
@@ -239,9 +240,6 @@ def get_biodiversity_subset(years, streamlit_secret=True, chunks_per_year=500):
         biodiversity_chunks = {record["chunk_id"]: record for record in biodiversity_results}
         return driver, biodiversity_chunks
     
-driver, biodiversity_subset = get_biodiversity_subset(chunks_per_year=100000)
-chunks = fetch_chunks_for_term_for_years_biodiv_subset(driver, biodiversity_subset)
-
 def fetch_chunks_for_term_for_years_biodiv_subset(driver, years, term, glossary_embedding, biodiversity_subset, contains=False, streamlit_secret=True, chunks_per_year=50, batch_size=200):
     """
     First filters chunks broadly related to biodiversity, then computes similarity

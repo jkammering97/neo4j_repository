@@ -1,15 +1,11 @@
 #%%
-from neo4j_access import *
+from legacy.neo4j_access import *
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 import numpy as np
 from numpy.linalg import norm
 import pandas as pd
 #from sentence_transformers import SentenceTransformer
-
-import streamlit as st
-
-import umap
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -19,46 +15,8 @@ import plotly.graph_objects as go
 import plotly.express as px
 import textwrap
 #%%
-from glossary_similarity import fetch_chunks_for_term_for_years, fetch_chunks_for_term_for_years_biodiv_subset, get_biodiversity_subset
+from glossary_similarity import fetch_chunks_for_term_for_years_biodiv_subset, get_biodiversity_subset
 #%%
-
-def plot_similarity_distributions(df):
-    """
-    Plots the Gaussian-like similarity distribution for all terms across different years.
-
-    Parameters:
-        df (pd.DataFrame): DataFrame containing 'year' and 'score' columns.
-    """
-    # Ensure necessary columns exist
-    if "year" not in df or "score" not in df:
-        raise ValueError("DataFrame must contain 'year' and 'score' columns")
-
-    plt.figure(figsize=(10, 6))
-
-    # Plot KDE distribution per year
-    unique_years = sorted(df["year"].unique())
-    for year in unique_years:
-        subset = df[df["year"] == year]
-        sns.kdeplot(subset["score"], label=str(year), fill=True, alpha=0.4)
-
-    # Formatting
-    plt.xlabel("Similarity Score")
-    plt.ylabel("Density")
-    plt.title("Similarity Score Distribution Over Time")
-    plt.xlim(0.5, 1)  # Restrict similarity score range
-    plt.legend(title="Year", bbox_to_anchor=(1.05, 1), loc="upper left")
-    plt.grid(axis="y", linestyle="--", alpha=0.6)
-
-    # plt.show()
-
-#%%
-model = SentenceTransformer('all-mpnet-base-v2', device='cpu')
-df_tfnd_glossary_2023["embedding"] = df_tfnd_glossary_2023["Definition"].apply(lambda term: model.encode(term, convert_to_numpy=True))
-#%%
-df_tfnd_glossary_2023.to_json("data/df_tfnd_glossary_2023_embedded.json", orient="records")
-#%%
-df_tfnd_glossary_2023 = pd.read_json("data/df_tfnd_glossary_2023_embedded.json", orient="records")
-df_tfnd_glossary_2023["embedding"] = df_tfnd_glossary_2023["embedding"].apply(lambda x: np.array(x, dtype=np.float32))
 #%%
 terms = ['Nature-related systemic risks', 
         'Nature-related physical risks',
@@ -70,7 +28,7 @@ sub_tnfd_glossary = df_tfnd_glossary_2023[df_tfnd_glossary_2023['Term'].isin(ter
 time_frame = [2015,2016,2017,2018,2019,2020,2021,2022,2023]
 all_terms_similar_embeddings = pd.DataFrame()
 
-# fetch biodiv. subset from data base
+# fetch biodiv. subset from database
 driver, biodiversity_subset = get_biodiversity_subset(time_frame,chunks_per_year=100000,streamlit_secret=False)
 
 for i, row in sub_tnfd_glossary.iterrows():
@@ -200,6 +158,35 @@ fig = px.violin(
 # Display the figure
 fig.show()
 # %%
+
+
+
+def plot_similarity_density(df):
+    """
+    Plots the Gaussian-like similarity distribution for all terms across different years.
+    Parameters:
+        df (pd.DataFrame): DataFrame containing 'year' and 'score' columns.
+    """
+    # Ensure necessary columns exist
+    if "year" not in df or "score" not in df:
+        raise ValueError("DataFrame must contain 'year' and 'score' columns")
+
+    plt.figure(figsize=(10, 6))
+
+    # Plot KDE distribution per year
+    unique_years = sorted(df["year"].unique())
+    for year in unique_years:
+        subset = df[df["year"] == year]
+        sns.kdeplot(subset["score"], label=str(year), fill=True, alpha=0.4)
+
+    # Formatting
+    plt.xlabel("Similarity Score")
+    plt.ylabel("Density")
+    plt.title("Similarity Score Distribution Over Time")
+    plt.xlim(0.5, 1)  # Restrict similarity score range
+    plt.legend(title="Year", bbox_to_anchor=(1.05, 1), loc="upper left")
+    plt.grid(axis="y", linestyle="--", alpha=0.6)
+#%%
 def scatterplot_by_terms(df, terms):
     # Ensure necessary columns exist
     required_cols = ["year", "score", "term", "chunk_text", "company", "industry"]
@@ -267,7 +254,6 @@ def scatterplot_by_terms(df, terms):
     fig.show()
 
 #%%
-
 def scatterplot_compare_terms(df1, df2, label1="Dataset 1", label2="Dataset 2"):
     """
     Plots similarity scores over time from two different datasets with distinct colors,
@@ -359,7 +345,6 @@ def scatterplot_compare_terms(df1, df2, label1="Dataset 1", label2="Dataset 2"):
     )
 
     fig.show()
-
 # %%
 def scatterplot_compare_terms_jitter(df1, df2, label1="Dataset 1", label2="Dataset 2"):
     """
@@ -557,7 +542,4 @@ def plot_term_trends_over_time(df, top_n=20, bin_size=2):
     )
 
     fig.show()
-
-# Usage example:
-# plot_term_trends_over_time(all_terms_similar_embeddings, top_n=20)
 # %%
