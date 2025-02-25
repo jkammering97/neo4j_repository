@@ -5,3 +5,4 @@
 *.pdf
 *.pkl
 /legacy
+*.DS_STORE
