@@ -21,7 +21,7 @@ def load_biodiversity_embed():
     df_tfnd_glossary_2023["embedding"] = df_tfnd_glossary_2023["embedding"].apply(lambda x: np.array(x, dtype=np.float32))
     return df_tfnd_glossary_2023[df_tfnd_glossary_2023['Term']=='Biodiversity']
 
-def initialize(streamlit_secret=True, with_bio=False):
+def initialize(streamlit_secret=True, with_bio=False, custom_definition=None):
     """Initialize the Neo4j driver using Streamlit secrets for deployment."""
     if streamlit_secret == False:
         URI = os.getenv("NEO4J_URI")
@@ -44,8 +44,11 @@ def initialize(streamlit_secret=True, with_bio=False):
     if not URI or not USERNAME or not PASSWORD:
         raise ValueError("Neo4j credentials are missing! Ensure they are set in GitHub Secrets or your .env file.")
     if with_bio:
-        biodiversity_embedding = load_biodiversity_embed()
-        print('returning biodiv also')
+        if isinstance(custom_definition, np.ndarray) and custom_definition.size > 0:
+            biodiversity_embedding = custom_definition
+        else:
+            biodiversity_embedding = load_biodiversity_embed()
+            print('returning biodiv also')
         return GraphDatabase.driver(URI, auth=(USERNAME, PASSWORD)), biodiversity_embedding
     else:
         return GraphDatabase.driver(URI, auth=(USERNAME, PASSWORD))
@@ -211,13 +214,13 @@ def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, s
 
     return chunks
 
-def get_biodiversity_subset(years, streamlit_secret=True, chunks_per_year=500):
+def get_biodiversity_subset(years, streamlit_secret=True, chunks_per_year=500, custom_definition=""):
     """
     First filters chunks broadly related to biodiversity, then computes similarity
     scores to return the most relevant chunks for the given term.
     """
 
-    driver, biodiversity_embedding = initialize(streamlit_secret=streamlit_secret, with_bio=True)
+    driver, biodiversity_embedding = initialize(streamlit_secret=streamlit_secret, with_bio=True, custom_definition=custom_definition)
 
     with driver.session() as session:
         ### STEP 1: PRE-FILTER CHUNKS THAT ARE BROADLY RELATED TO BIODIVERSITY ###
@@ -232,15 +235,19 @@ def get_biodiversity_subset(years, streamlit_secret=True, chunks_per_year=500):
                datetime(e.time).month AS month, chunk.embedding AS embedding, score
         ORDER BY score DESC
         """
+        if not len(custom_definition) > 0:
+            biodiversity_embedding = biodiversity_embedding['embedding'].values[0].tolist()
+        else:
+            biodiversity_embedding = biodiversity_embedding.tolist()
         biodiversity_results = session.run(
-            biodiversity_filter_query, n=chunks_per_year,years=years, biodiversity_embedding=biodiversity_embedding['embedding'].values[0].tolist()
+            biodiversity_filter_query, n=chunks_per_year,years=years, biodiversity_embedding=biodiversity_embedding
         )
         
         # Convert results to dictionary for lookup
         biodiversity_chunks = {record["chunk_id"]: record for record in biodiversity_results}
         return driver, biodiversity_chunks
     
-def fetch_chunks_for_term_for_years_biodiv_subset(driver, years, term, glossary_embedding, biodiversity_subset, contains=False, streamlit_secret=True, chunks_per_year=50, batch_size=200):
+def fetch_chunks_for_term_for_years_biodiv_subset(driver, years, term, glossary_embedding, biodiversity_subset: dict, contains=False, streamlit_secret=True, chunks_per_year=50, batch_size=200):
     """
     First filters chunks broadly related to biodiversity, then computes similarity
     scores to return the most relevant chunks for the given term.
@@ -259,7 +266,7 @@ def fetch_chunks_for_term_for_years_biodiv_subset(driver, years, term, glossary_
         {term_filter}  
         RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
                s.text AS statement, datetime(e.time).year AS year, 
-               datetime(e.time).month AS month, similarChunk.embedding AS embedding, score
+               datetime(e.time).month AS month, datetime(e.time).day AS day, similarChunk.embedding AS embedding, score
         ORDER BY year DESC, month ASC, score DESC
         """
 
@@ -282,7 +289,7 @@ def fetch_chunks_for_term_for_years_biodiv_subset(driver, years, term, glossary_
             RETURN elementId(c) AS id, c.embedding AS embedding, 
                    substring(s.text, c.start_index, c.end_index - c.start_index+1) AS chunk_text,
                    s.name AS name, datetime(e.time).year AS year, datetime(e.time).month AS month, 
-                   co.name AS company, i.name AS industry
+                   datetime(e.time).day AS day, co.name AS company, i.name AS industry
             ORDER BY year DESC, month ASC
             """
             results = session.run(batch_query, batch_ids=batch_ids)
@@ -293,7 +300,8 @@ def fetch_chunks_for_term_for_years_biodiv_subset(driver, years, term, glossary_
             batch_chunks = fetch_batch(session, batch_ids)
 
             for chunk in batch_chunks:
-                chunk['embedding'] = np.array(chunk['embedding'], dtype=np.float32)
+                chunk['chunk_embedding_float32'] = np.array(chunk['embedding'], dtype=np.float32)
+                chunk['chunk_embedding_float64'] = chunk.pop('embedding')
                 chunk['score'] = id_score_map.get(chunk['id'], None)  
                 chunks.append(chunk)
 
