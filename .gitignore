@@ -5,4 +5,4 @@
 *.pdf
 *.pkl
 /legacy
-*.DS_STORE
+*.DS_STOREdata/biodiversity_subset.json
