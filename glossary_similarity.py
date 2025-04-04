@@ -1,5 +1,7 @@
 #%%
 # from legacy.neo4j_access import *
+# Suppress warnings from Neo4j logs
+import logging
 from dotenv import load_dotenv
 from neo4j import GraphDatabase
 import numpy as np
@@ -11,9 +13,13 @@ import streamlit as st
 
 import umap
 
+import statsmodels.api as sm
+from IPython.core.display import display, HTML
+
 import plotly.graph_objects as go
 import plotly.express as px
 import textwrap
+
 import os
 #%%
 def load_biodiversity_embed():
@@ -21,6 +27,7 @@ def load_biodiversity_embed():
     df_tfnd_glossary_2023["embedding"] = df_tfnd_glossary_2023["embedding"].apply(lambda x: np.array(x, dtype=np.float32))
     return df_tfnd_glossary_2023[df_tfnd_glossary_2023['Term']=='Biodiversity']
 
+#%%
 def initialize(streamlit_secret=True, with_bio=False, custom_definition=None):
     """Initialize the Neo4j driver using Streamlit secrets for deployment."""
     if streamlit_secret == False:
@@ -38,8 +45,7 @@ def initialize(streamlit_secret=True, with_bio=False, custom_definition=None):
             URI = os.environ.get("NEO4J_URI")
             USERNAME = os.environ.get("USERNAME")
             PASSWORD = os.environ.get("DB_PASSWORD")
-    # Suppress warnings from Neo4j logs
-    import logging
+
     logging.getLogger("neo4j").setLevel(logging.ERROR)
     if not URI or not USERNAME or not PASSWORD:
         raise ValueError("Neo4j credentials are missing! Ensure they are set in GitHub Secrets or your .env file.")
@@ -49,58 +55,14 @@ def initialize(streamlit_secret=True, with_bio=False, custom_definition=None):
         else:
             biodiversity_embedding = load_biodiversity_embed()
             print('returning biodiv also')
+            if biodiversity_embedding.empty:
+                raise ValueError("No biodiversity data found! Check if the glossary contains the term 'Biodiversity'.")
+
+            biodiversity_embedding = biodiversity_embedding['embedding'].values[0]  # Extract NumPy array
+
         return GraphDatabase.driver(URI, auth=(USERNAME, PASSWORD)), biodiversity_embedding
     else:
         return GraphDatabase.driver(URI, auth=(USERNAME, PASSWORD))
-
-def make_yrl_query_old(year, month, glossary_embedding, chunks_per_month=400, batch_size=100):
-
-    driver = initialize()
-
-    def fetch_batch(session, batch_ids):
-        batch_query = """
-        MATCH (c:Chunk) WHERE elementId(c) IN $batch_ids
-        MATCH (c)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)<-[:ARRANGED]-(co:Company)-[:IN_INDUSTRY]->(i:Industry)
-        RETURN elementId(c) AS id, c.embedding AS embedding, 
-               substring(s.text, c.start_index, c.end_index - c.start_index+1) AS chunk_text,
-               s.name AS name, datetime(e.time).year AS year, datetime(e.time).month AS month, 
-               co.name AS company, i.name AS industry
-        ORDER BY year DESC, month DESC
-        """
-        results = session.run(batch_query, batch_ids=batch_ids)
-        return [dict(record) for record in results]
-
-    with driver.session() as session:
-        # Get IDs of all chunks containing the specific year and month
-        id_query = """
-        CALL db.index.vector.queryNodes('chunk_embeddings', $n, $glossary_embedding)
-        YIELD node AS similarChunk, score
-        MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
-        WHERE datetime(e.time).year = $year  // Fetch ALL data for the year
-        RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
-            s.text AS statement, datetime(e.time).year AS year, 
-            datetime(e.time).month AS month, score
-        ORDER BY year DESC, month ASC, score DESC
-        """
-        ids = [record["chunk_id"] for record in session.run(
-            id_query, year=year, month=month, n=chunks_per_month, glossary_embedding=glossary_embedding
-        )]
-
-        total_ids = len(ids)
-        chunks = []
-        for i in range(0, total_ids, batch_size):
-            batch_ids = ids[i:i + batch_size]
-            batch_chunks = fetch_batch(session, batch_ids)
-
-            for chunk in batch_chunks:
-                chunk['embedding'] = np.array(chunk['embedding'], dtype=np.float32)
-                chunk['year'] = year
-                chunk['month'] = month
-                chunks.append(chunk)
-            
-    driver.close()
-    print(f'Processing size {len(chunks)} for {year}-{month}')
-    return chunks
 
 def make_yrl_query(year, glossary_embedding, chunks_per_year=250, batch_size=100):
     driver = initialize()
@@ -164,7 +126,7 @@ def fetch_chunks_for_term_for_years(years, term, glossary_embedding, contains, s
 
     with driver.session() as session:
         term_filter = "AND s.text CONTAINS $term" if contains == "yes" else ""
-
+    
         id_query = f"""
         CALL db.index.vector.queryNodes('chunk_embeddings', $n, $glossary_embedding)
         YIELD node AS similarChunk, score
@@ -229,15 +191,13 @@ def get_biodiversity_subset(years, streamlit_secret=True, chunks_per_year=500, c
         YIELD node AS chunk, score
         MATCH (chunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
         WHERE datetime(e.time).year IN $years
-        AND size(s.text) > 200  // Minimum length filter
+        // AND size(s.text) > 200  // Minimum length filter
         RETURN elementId(chunk) AS chunk_id, elementId(s) AS statement_id, 
                s.text AS statement, datetime(e.time).year AS year, 
                datetime(e.time).month AS month, chunk.embedding AS embedding, score
         ORDER BY score DESC
         """
-        if not len(custom_definition) > 0:
-            biodiversity_embedding = biodiversity_embedding['embedding'].values[0].tolist()
-        else:
+        if not len(custom_definition) == 0:
             biodiversity_embedding = biodiversity_embedding.tolist()
         biodiversity_results = session.run(
             biodiversity_filter_query, n=chunks_per_year,years=years, biodiversity_embedding=biodiversity_embedding
@@ -247,7 +207,41 @@ def get_biodiversity_subset(years, streamlit_secret=True, chunks_per_year=500, c
         biodiversity_chunks = {record["chunk_id"]: record for record in biodiversity_results}
         return driver, biodiversity_chunks
     
-def fetch_chunks_for_term_for_years_biodiv_subset(driver, years, term, glossary_embedding, biodiversity_subset: dict, contains=False, streamlit_secret=True, chunks_per_year=50, batch_size=200):
+def get_biodiversity_subset_year_bins(chunks_per_year=10000, custom_definition=""):
+    """
+    First filters chunks broadly related to biodiversity, then computes similarity
+    scores to return the most relevant chunks for the given term.
+    """
+    time_frame = [2014,2015,2016,2017,2018,2019,2020,2021,2022]
+    driver, biodiversity_embedding = initialize(streamlit_secret=False, with_bio=True, custom_definition="")
+    biodiversity_chunks = {}
+    with driver.session() as session:
+        for year in time_frame:
+            index_name = f"chunk_embeddings_{year}"  # Dynamically select index per year
+            print(f"Fetching data from index: {index_name}")
+
+            biodiversity_filter_query = f"""
+                        CALL db.index.vector.queryNodes('{index_name}', $n, $term_embedding)
+                        YIELD node AS similarChunk, score
+                        MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
+                        RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
+                            s.text AS statement, datetime(e.time).year AS year, 
+                            similarChunk.embedding AS embedding, score
+                        ORDER BY year DESC, score DESC
+                        """
+            if not len(custom_definition) == 0:
+                biodiversity_embedding = biodiversity_embedding.tolist()
+            biodiversity_results = session.run(
+                biodiversity_filter_query, n=chunks_per_year, term_embedding=biodiversity_embedding
+            )
+            
+            # Convert results to dictionary for lookup
+            for record in biodiversity_results:
+                biodiversity_chunks[record["chunk_id"]] = record  # Append results to dictionary
+
+        return driver, biodiversity_chunks
+
+def fetch_chunks_for_term_for_years_biodiv_subset(driver, years, term, term_embedding, biodiversity_subset: dict, contains=False, streamlit_secret=True, chunks_per_year=50, batch_size=200):
     """
     First filters chunks broadly related to biodiversity, then computes similarity
     scores to return the most relevant chunks for the given term.
@@ -258,7 +252,7 @@ def fetch_chunks_for_term_for_years_biodiv_subset(driver, years, term, glossary_
         term_filter = "AND s.text CONTAINS $term" if contains == "yes" else ""
 
         id_query = f"""
-        CALL db.index.vector.queryNodes('chunk_embeddings', $n, $glossary_embedding)
+        CALL db.index.vector.queryNodes('chunk_embeddings', $n, $term_embedding)
         YIELD node AS similarChunk, score
         MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
         WHERE datetime(e.time).year IN $years
@@ -271,7 +265,7 @@ def fetch_chunks_for_term_for_years_biodiv_subset(driver, years, term, glossary_
         """
 
         id_results = session.run(
-            id_query, years=years, term=term, n=chunks_per_year, glossary_embedding=glossary_embedding, 
+            id_query, years=years, term=term, n=chunks_per_year, term_embedding=term_embedding, 
             biodiversity_chunks=list(biodiversity_subset.keys())
         )
 
@@ -308,36 +302,241 @@ def fetch_chunks_for_term_for_years_biodiv_subset(driver, years, term, glossary_
     driver.close()
     return chunks
 
-def flatten_embeddings(dict_yrl_results: dict):
-    flattened_data = []
+def fetch_chunks_for_fixed_year_bins(driver, term, term_embedding, biodiversity_subset: dict, contains=False, streamlit_secret=True, chunks_per_year=50, batch_size=200):
 
-    for year, records in dict_yrl_results.items():
-        for record in records:
-            flattened_data.append({
-                "year": year,
-                "month": record.get("month", 1),  # Default to January if missing
-                "id": record["id"],
-                "company": record["company"],
-                "industry": record["industry"],
-                "chunk": record["chunk_text"],
-                "embedding": record["embedding"]
-            })
+    with driver.session() as session:
 
-    df_yrl_terms = pd.DataFrame(flattened_data)
-    return df_yrl_terms
+        id_score_map = {record["chunk_id"]: record["score"] for record in id_results}
+        ids = list(id_score_map.keys())
 
-def compute_term_dist_cosine(df: pd.DataFrame, term_embedding: np.array):
-    # Convert list of arrays to a 2D NumPy array
-    embedding_matrix = np.vstack(df["embedding"].values)
-    # Compute norms in a vectorized way
-    embedding_norms = np.linalg.norm(embedding_matrix, axis=1)
-    term_norm = np.linalg.norm(term_embedding)
+        total_ids = len(ids)
+        chunks = []
 
-    # Compute cosine similarity for all rows in one go
-    cosine_similarities = np.dot(embedding_matrix, term_embedding) / (embedding_norms * term_norm)
+        ### STEP 3: FETCH ADDITIONAL CHUNK DETAILS ###
+        def fetch_meta_info(session, batch_ids):
+            batch_query = """
+            MATCH (c:Chunk) WHERE elementId(c) IN $batch_ids
+            MATCH (c)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)<-[:ARRANGED]-(co:Company)-[:IN_INDUSTRY]->(i:Industry)
+            RETURN elementId(c) AS id, c.embedding AS embedding, 
+                   substring(s.text, c.start_index, c.end_index - c.start_index+1) AS chunk_text,
+                   s.name AS name, datetime(e.time).year AS year, datetime(e.time).month AS month, 
+                   datetime(e.time).day AS day, co.name AS company, i.name AS industry
+            ORDER BY year DESC, month ASC
+            """
+            results = session.run(batch_query, batch_ids=batch_ids)
+            return [dict(record) for record in results]
 
-    # Assign results directly to the DataFrame
-    df["similarity"] = cosine_similarities
+        for i in range(0, total_ids, batch_size):
+            batch_ids = ids[i:i + batch_size]
+            batch_chunks = fetch_meta_info(session, batch_ids)
+
+            for chunk in batch_chunks:
+                chunk['chunk_embedding_float32'] = np.array(chunk['embedding'], dtype=np.float32)
+                chunk['chunk_embedding_float64'] = chunk.pop('embedding')
+                chunk['score'] = id_score_map.get(chunk['id'], None)  
+                chunks.append(chunk)
+
+    driver.close()
+    return chunks
+
+def fetch_chunks_by_year_bins(driver:GraphDatabase.driver, 
+                              years:list, 
+                              term:str,
+                              term_embedding,
+                              biodiversity_subset:dict, 
+                              chunks_per_year=1000, 
+                              batch_size=200):
+    """
+    First filters chunks broadly related to biodiversity, then computes similarity
+    scores to return the most relevant chunks for the given term.
+    """
+    with driver.session() as session:
+        chunks = []
+        for year in years:
+            index_name = f"chunk_embeddings_{year}"  # Dynamically select index per year
+            print(f"Fetching data from index: {index_name}")
+
+            id_query = f"""
+            CALL db.index.vector.queryNodes('{index_name}', $n, $term_embedding)
+            YIELD node AS similarChunk, score
+            MATCH (similarChunk)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)
+            WHERE elementId(similarChunk) IN $biodiversity_chunks  // Only keep biodiversity-related chunks
+    
+            RETURN elementId(similarChunk) AS chunk_id, elementId(s) AS statement_id, 
+                s.text AS statement, datetime(e.time).year AS year, 
+                datetime(e.time).month AS month, datetime(e.time).day AS day, similarChunk.embedding AS embedding, score
+            ORDER BY year DESC, month ASC, score DESC
+            """
+
+            id_results = session.run(
+                id_query, years=years, term=term, n=chunks_per_year, term_embedding=term_embedding
+                ,biodiversity_chunks=list(biodiversity_subset.keys())
+            )
+
+            id_score_map = {record["chunk_id"]: record["score"] for record in id_results}
+            ids = list(id_score_map.keys())
+
+            total_ids = len(ids)
+            
+            ### STEP 3: FETCH ADDITIONAL CHUNK DETAILS ###
+            def fetch_batch(session, batch_ids):
+                batch_query = """
+                MATCH (c:Chunk) WHERE elementId(c) IN $batch_ids
+                MATCH (c)<-[:INCLUDES]-(s:Statement)-[:WAS_GIVEN_AT]->(e:ECC)<-[:ARRANGED]-(co:Company)-[:IN_INDUSTRY]->(i:Industry)
+                RETURN elementId(c) AS id, c.embedding AS embedding, 
+                    substring(s.text, c.start_index, c.end_index - c.start_index+1) AS chunk_text,
+                    s.name AS name, datetime(e.time).year AS year, datetime(e.time).month AS month, 
+                    datetime(e.time).day AS day, co.name AS company, i.name AS industry
+                ORDER BY year DESC, month ASC
+                """
+                results = session.run(batch_query, batch_ids=batch_ids)
+                return [dict(record) for record in results]
+
+            for i in range(0, total_ids, batch_size):
+                batch_ids = ids[i:i + batch_size]
+                batch_chunks = fetch_batch(session, batch_ids)
+
+                for chunk in batch_chunks:
+                    chunk['chunk_embedding_float32'] = np.array(chunk['embedding'], dtype=np.float32)
+                    chunk['chunk_embedding_float64'] = chunk.pop('embedding')
+                    chunk['score'] = id_score_map.get(chunk['id'], None)  
+                    chunks.append(chunk)
+
+    driver.close()
+    return chunks
+
+def fit_and_compute_regression_by_terms(df, terms: list):
+    """
+    Runs regression models for each term separately for:
+    1. Sector regression (score ~ after_tnfd + did_term_sector + tnfd_treated_sector)
+    2. Industry regression (score ~ after_tnfd + did_term_industry + tnfd_treated_industry)
+    3. Simple regression: score ~ after_tnfd
+    4. Simple regression: score ~ delta_since_TNFD
+
+    Parameters:
+    df (pd.DataFrame): Data containing independent and dependent variables.
+    terms (list): List of terms to filter for the rows.
+
+    Returns:
+    pd.DataFrame: A DataFrame where rows are terms, and columns contain R² and p-values per regression.
+    """
+    results = []
+    if not terms:
+        terms = df['term'].unique().tolist()
+    for term in terms:
+        term_df = df.loc[df['term'] == term]
+
+        if term_df.empty:
+            print(f"Warning: No data found for term '{term}'")
+            continue
+
+        result = {'term': term,
+                  'n': len(term_df)}
+
+        # 1️⃣ Regression for SECTOR
+        X_sector = term_df[['after_tnfd', 'did_term_sector', 'tnfd_treated_sector']]
+        y = term_df['score']
+        X_sector = sm.add_constant(X_sector)  # Add intercept
+        model_sector = sm.OLS(y, X_sector).fit()
+
+        result['did_sector'] = format_regression_output(model_sector, ['after_tnfd', 'did_term_sector', 'tnfd_treated_sector'])
+
+        # 2️⃣ Regression for INDUSTRY
+        X_industry = term_df[['after_tnfd', 'did_term_industry', 'tnfd_treated_industry']]
+        X_industry = sm.add_constant(X_industry)  # Add intercept
+        model_industry = sm.OLS(y, X_industry).fit()
+
+        result['did_industry'] = format_regression_output(model_industry, ['after_tnfd', 'did_term_industry', 'tnfd_treated_industry'])
+
+        # 3️⃣ Simple Regression: score ~ after_tnfd
+        X_after_tnfd = term_df[['after_tnfd']]
+        X_after_tnfd = sm.add_constant(X_after_tnfd)  # Add intercept
+        model_after_tnfd = sm.OLS(y, X_after_tnfd).fit()
+
+        result['score->after_tnfd'] = format_regression_output(model_after_tnfd, ['after_tnfd'])
+
+        # 4️⃣ Simple Regression: score ~ delta_since_TNFD
+        X_delta_tnfd = term_df[['delta_since_TNFD']]
+        X_delta_tnfd = sm.add_constant(X_delta_tnfd)  # Add intercept
+        model_delta_tnfd = sm.OLS(y, X_delta_tnfd).fit()
+
+        result['score->delta_since_tnfd'] = format_regression_output(model_delta_tnfd, ['delta_since_TNFD'])
+
+        results.append(result)
+
+    return pd.DataFrame(results)
+
+def fit_and_compute_regression(df):
+    results = []
+    result = {'n': len(df)}
+
+    # 1️⃣ Regression for SECTOR
+    X_sector = df[['after_tnfd', 'did_term_sector', 'tnfd_treated_sector']]
+    y = df['score']
+    X_sector = sm.add_constant(X_sector)  # Add intercept
+    model_sector = sm.OLS(y, X_sector).fit()
+
+    result['did_sector'] = format_regression_output(model_sector, ['after_tnfd', 'did_term_sector', 'tnfd_treated_sector'])
+
+    # 2️⃣ Regression for INDUSTRY
+    X_industry = df[['after_tnfd', 'did_term_industry', 'tnfd_treated_industry']]
+    X_industry = sm.add_constant(X_industry)  # Add intercept
+    model_industry = sm.OLS(y, X_industry).fit()
+
+    result['did_industry'] = format_regression_output(model_industry, ['after_tnfd', 'did_term_industry', 'tnfd_treated_industry'])
+
+    # 3️⃣ Simple Regression: score ~ after_tnfd
+    X_after_tnfd = df[['after_tnfd']]
+    X_after_tnfd = sm.add_constant(X_after_tnfd)  # Add intercept
+    model_after_tnfd = sm.OLS(y, X_after_tnfd).fit()
+
+    result['score->after_tnfd'] = format_regression_output(model_after_tnfd, ['after_tnfd'])
+
+    # 4️⃣ Simple Regression: score ~ delta_since_TNFD
+    X_delta_tnfd = df[['delta_since_TNFD']]
+    X_delta_tnfd = sm.add_constant(X_delta_tnfd)  # Add intercept
+    model_delta_tnfd = sm.OLS(y, X_delta_tnfd).fit()
+
+    result['score->delta_since_tnfd'] = format_regression_output(model_delta_tnfd, ['delta_since_TNFD'])
+
+    results.append(result)
+
+    return pd.DataFrame(results)
+
+def format_regression_output(model, variables):
+    """
+    Formats the regression output to display R² and p-values in one cell.
+    """
+    output = f"R²: {model.rsquared:.4f}<br>"  # Add a newline after R²
+    for var in variables:
+        output += f"p({var}): {model.pvalues[var]:.4f} {get_significance_marker(model.pvalues[var])}<br>"
+    return output.strip()  # Remove trailing spaces
+
+def get_significance_marker(p_value):
+    """
+    Returns the significance marker based on the p-value.
+    """
+    if p_value < 0.01:
+        return "***"
+    elif p_value < 0.05:
+        return "**"
+    elif p_value < 0.1:
+        return "*"
+    else:
+        return ""
+# ---
+# def compute_term_dist_cosine(df: pd.DataFrame, term_embedding: np.array):
+#     # Convert list of arrays to a 2D NumPy array
+#     embedding_matrix = np.vstack(df["embedding"].values)
+#     # Compute norms in a vectorized way
+#     embedding_norms = np.linalg.norm(embedding_matrix, axis=1)
+#     term_norm = np.linalg.norm(term_embedding)
+
+#     # Compute cosine similarity for all rows in one go
+#     cosine_similarities = np.dot(embedding_matrix, term_embedding) / (embedding_norms * term_norm)
+
+#     # Assign results directly to the DataFrame
+#     df["similarity"] = cosine_similarities
 
 def wrap_text(text, width=50):
     """Wraps text into multiple lines for better readability in hover text."""

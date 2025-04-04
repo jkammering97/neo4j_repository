@@ -1,0 +1,1142 @@
+[
+  {
+    "industry": "Asset Management and Custody Banks",
+    "nature_dependency": "Tertiary",
+    "count": 650
+  },
+  {
+    "industry": "Electrical Components and Equipment",
+    "nature_dependency": "Secondary",
+    "count": 167
+  },
+  {
+    "industry": "Commodity Chemicals",
+    "nature_dependency": "Primary",
+    "count": 221
+  },
+  {
+    "industry": "Property and Casualty Insurance",
+    "nature_dependency": "Tertiary",
+    "count": 150
+  },
+  {
+    "industry": "Advertising",
+    "nature_dependency": "Tertiary",
+    "count": 196
+  },
+  {
+    "industry": "Oil and Gas Equipment and Services",
+    "nature_dependency": "Primary",
+    "count": 157
+  },
+  {
+    "industry": "Multi-Sector Holdings",
+    "nature_dependency": "Tertiary",
+    "count": 277
+  },
+  {
+    "industry": "Investment Banking and Brokerage",
+    "nature_dependency": "Tertiary",
+    "count": 150
+  },
+  {
+    "industry": "Diversified Banks",
+    "nature_dependency": "Tertiary",
+    "count": 249
+  },
+  {
+    "industry": "Regional Banks",
+    "nature_dependency": "Tertiary",
+    "count": 227
+  },
+  {
+    "industry": "Alternative Carriers",
+    "nature_dependency": "Tertiary",
+    "count": 111
+  },
+  {
+    "industry": "Communications Equipment",
+    "nature_dependency": "Secondary",
+    "count": 191
+  },
+  {
+    "industry": "Industrial Machinery and Supplies and Components",
+    "nature_dependency": "Secondary",
+    "count": 279
+  },
+  {
+    "industry": "Savings Institutions, Federally Chartered",
+    "nature_dependency": "Tertiary",
+    "count": 4
+  },
+  {
+    "industry": "Publishing",
+    "nature_dependency": "Tertiary",
+    "count": 86
+  },
+  {
+    "industry": "Broadcasting",
+    "nature_dependency": "Tertiary",
+    "count": 53
+  },
+  {
+    "industry": "Health Care Equipment",
+    "nature_dependency": "Tertiary",
+    "count": 416
+  },
+  {
+    "industry": "Application Software",
+    "nature_dependency": "Tertiary",
+    "count": 874
+  },
+  {
+    "industry": "Life and Health Insurance",
+    "nature_dependency": "Tertiary",
+    "count": 117
+  },
+  {
+    "industry": "Financial Exchanges and Data",
+    "nature_dependency": "Tertiary",
+    "count": 42
+  },
+  {
+    "industry": "Pharmaceuticals",
+    "nature_dependency": "Tertiary",
+    "count": 742
+  },
+  {
+    "industry": "Specialized Finance",
+    "nature_dependency": "Tertiary",
+    "count": 109
+  },
+  {
+    "industry": "IT Consulting and Other Services",
+    "nature_dependency": "Tertiary",
+    "count": 408
+  },
+  {
+    "industry": "Health Care Services",
+    "nature_dependency": "Tertiary",
+    "count": 193
+  },
+  {
+    "industry": "Trading Companies and Distributors",
+    "nature_dependency": "Secondary",
+    "count": 150
+  },
+  {
+    "industry": "Consumer Electronics",
+    "nature_dependency": "Secondary",
+    "count": 41
+  },
+  {
+    "industry": "Restaurants",
+    "nature_dependency": "Primary",
+    "count": 145
+  },
+  {
+    "industry": "Diversified REITs",
+    "nature_dependency": "Tertiary",
+    "count": 109
+  },
+  {
+    "industry": "Other Specialty Retail",
+    "nature_dependency": "Tertiary",
+    "count": 109
+  },
+  {
+    "industry": "Biotechnology",
+    "nature_dependency": "Tertiary",
+    "count": 723
+  },
+  {
+    "industry": "Automotive Parts and Equipment",
+    "nature_dependency": "Secondary",
+    "count": 180
+  },
+  {
+    "industry": "Human Resource and Employment Services",
+    "nature_dependency": "Tertiary",
+    "count": 76
+  },
+  {
+    "industry": "Automotive Retail",
+    "nature_dependency": "Secondary",
+    "count": 59
+  },
+  {
+    "industry": "Building Products",
+    "nature_dependency": "Secondary",
+    "count": 102
+  },
+  {
+    "industry": "Electronic Components",
+    "nature_dependency": "Secondary",
+    "count": 69
+  },
+  {
+    "industry": "Chemical Distribution",
+    "nature_dependency": "Primary",
+    "count": 3
+  },
+  {
+    "industry": "Agricultural and Farm Machinery",
+    "nature_dependency": "Primary",
+    "count": 9
+  },
+  {
+    "industry": "Semiconductors",
+    "nature_dependency": "Secondary",
+    "count": 188
+  },
+  {
+    "industry": "Movies and Entertainment",
+    "nature_dependency": "Tertiary",
+    "count": 126
+  },
+  {
+    "industry": "Commercial Printing",
+    "nature_dependency": "Secondary",
+    "count": 17
+  },
+  {
+    "industry": "Oil and Gas Exploration and Production",
+    "nature_dependency": "Primary",
+    "count": 364
+  },
+  {
+    "industry": "Consumer Finance",
+    "nature_dependency": "Tertiary",
+    "count": 144
+  },
+  {
+    "industry": "Health Care Distributors",
+    "nature_dependency": "Tertiary",
+    "count": 35
+  },
+  {
+    "industry": "Apparel Retail",
+    "nature_dependency": "Secondary",
+    "count": 126
+  },
+  {
+    "industry": "Diversified Support Services",
+    "nature_dependency": "Tertiary",
+    "count": 110
+  },
+  {
+    "industry": "Airport Services",
+    "nature_dependency": "Tertiary",
+    "count": 29
+  },
+  {
+    "industry": "Aerospace and Defense",
+    "nature_dependency": "Secondary",
+    "count": 171
+  },
+  {
+    "industry": "Housewares and Specialties",
+    "nature_dependency": "Secondary",
+    "count": 15
+  },
+  {
+    "industry": "Education Services",
+    "nature_dependency": "Tertiary",
+    "count": 106
+  },
+  {
+    "industry": "Technology Hardware, Storage and Peripherals",
+    "nature_dependency": "Secondary",
+    "count": 72
+  },
+  {
+    "industry": "Leisure Products",
+    "nature_dependency": "Tertiary",
+    "count": 54
+  },
+  {
+    "industry": "Heavy Electrical Equipment",
+    "nature_dependency": "Secondary",
+    "count": 77
+  },
+  {
+    "industry": "Paper and Plastic Packaging Products and Materials",
+    "nature_dependency": "Secondary",
+    "count": 33
+  },
+  {
+    "industry": "Environmental and Facilities Services",
+    "nature_dependency": "Tertiary",
+    "count": 73
+  },
+  {
+    "industry": "Passenger Ground Transportation",
+    "nature_dependency": "Secondary",
+    "count": 33
+  },
+  {
+    "industry": "Managed Health Care",
+    "nature_dependency": "Tertiary",
+    "count": 19
+  },
+  {
+    "industry": "Health Care Supplies",
+    "nature_dependency": "Tertiary",
+    "count": 77
+  },
+  {
+    "industry": "Air Freight and Logistics",
+    "nature_dependency": "Secondary",
+    "count": 99
+  },
+  {
+    "industry": "Soft Drinks and Non-alcoholic Beverages",
+    "nature_dependency": "Primary",
+    "count": 46
+  },
+  {
+    "industry": "Electronic Equipment and Instruments",
+    "nature_dependency": "Secondary",
+    "count": 145
+  },
+  {
+    "industry": "Health Care Facilities",
+    "nature_dependency": "Tertiary",
+    "count": 105
+  },
+  {
+    "industry": "Packaged Foods and Meats",
+    "nature_dependency": "Primary",
+    "count": 296
+  },
+  {
+    "industry": "General Merchandise Stores",
+    "nature_dependency": "Tertiary",
+    "count": 32
+  },
+  {
+    "industry": "Passenger Airlines",
+    "nature_dependency": "Secondary",
+    "count": 69
+  },
+  {
+    "industry": "Specialized Consumer Services",
+    "nature_dependency": "Tertiary",
+    "count": 64
+  },
+  {
+    "industry": "Diversified Metals and Mining",
+    "nature_dependency": "Primary",
+    "count": 275
+  },
+  {
+    "industry": "Personal Care Products",
+    "nature_dependency": "Tertiary",
+    "count": 89
+  },
+  {
+    "industry": "Metal, Glass and Plastic Containers",
+    "nature_dependency": "Secondary",
+    "count": 36
+  },
+  {
+    "industry": "Office Services and Supplies",
+    "nature_dependency": "Tertiary",
+    "count": 65
+  },
+  {
+    "industry": "Broadline Retail",
+    "nature_dependency": "Tertiary",
+    "count": 12
+  },
+  {
+    "industry": "Electric Utilities",
+    "nature_dependency": "Primary",
+    "count": 163
+  },
+  {
+    "industry": "Insurance Brokers",
+    "nature_dependency": "Tertiary",
+    "count": 65
+  },
+  {
+    "industry": "Construction and Engineering",
+    "nature_dependency": "Secondary",
+    "count": 296
+  },
+  {
+    "industry": "Integrated Telecommunication Services",
+    "nature_dependency": "Tertiary",
+    "count": 72
+  },
+  {
+    "industry": "Home Furnishings",
+    "nature_dependency": "Tertiary",
+    "count": 40
+  },
+  {
+    "industry": "Construction Materials",
+    "nature_dependency": "Secondary",
+    "count": 108
+  },
+  {
+    "industry": "Fertilizers and Agricultural Chemicals",
+    "nature_dependency": "Primary",
+    "count": 61
+  },
+  {
+    "industry": "Motor Vehicle Repair and Services",
+    "nature_dependency": "Secondary",
+    "count": 2
+  },
+  {
+    "industry": "Apparel, Accessories and Luxury Goods",
+    "nature_dependency": "Secondary",
+    "count": 128
+  },
+  {
+    "industry": "Homefurnishing Retail",
+    "nature_dependency": "Tertiary",
+    "count": 28
+  },
+  {
+    "industry": "Coal and Consumable Fuels",
+    "nature_dependency": "Primary",
+    "count": 56
+  },
+  {
+    "industry": "Steel",
+    "nature_dependency": "Secondary",
+    "count": 145
+  },
+  {
+    "industry": "Hotels, Resorts and Cruise Lines",
+    "nature_dependency": "Tertiary",
+    "count": 147
+  },
+  {
+    "industry": "Cable and Satellite",
+    "nature_dependency": "Tertiary",
+    "count": 27
+  },
+  {
+    "industry": "Forest Products",
+    "nature_dependency": "Primary",
+    "count": 39
+  },
+  {
+    "industry": "Construction Machinery and Heavy Transportation Equipment",
+    "nature_dependency": "Secondary",
+    "count": 79
+  },
+  {
+    "industry": "Rail Transportation",
+    "nature_dependency": "Secondary",
+    "count": 27
+  },
+  {
+    "industry": "Real Estate Operating Companies",
+    "nature_dependency": "Tertiary",
+    "count": 165
+  },
+  {
+    "industry": "Oil and Gas Storage and Transportation",
+    "nature_dependency": "Primary",
+    "count": 143
+  },
+  {
+    "industry": "Research and Consulting Services",
+    "nature_dependency": "Tertiary",
+    "count": 93
+  },
+  {
+    "industry": "Distributors",
+    "nature_dependency": "Secondary",
+    "count": 60
+  },
+  {
+    "industry": "Homebuilding",
+    "nature_dependency": "Secondary",
+    "count": 71
+  },
+  {
+    "industry": "Wireless Telecommunication Services",
+    "nature_dependency": "Tertiary",
+    "count": 83
+  },
+  {
+    "industry": "Security and Alarm Services",
+    "nature_dependency": "Tertiary",
+    "count": 14
+  },
+  {
+    "industry": "Specialty Chemicals",
+    "nature_dependency": "Primary",
+    "count": 127
+  },
+  {
+    "industry": "Department Stores",
+    "nature_dependency": "Tertiary",
+    "count": 29
+  },
+  {
+    "industry": "Household Appliances",
+    "nature_dependency": "Secondary",
+    "count": 47
+  },
+  {
+    "industry": "Brewers",
+    "nature_dependency": "Primary",
+    "count": 21
+  },
+  {
+    "industry": "Computer and Electronics Retail",
+    "nature_dependency": "Tertiary",
+    "count": 22
+  },
+  {
+    "industry": "Drug Retail",
+    "nature_dependency": "Tertiary",
+    "count": 27
+  },
+  {
+    "industry": "Textiles",
+    "nature_dependency": "Secondary",
+    "count": 35
+  },
+  {
+    "industry": "Nonresidential Building Operators and Lessors",
+    "nature_dependency": "Tertiary",
+    "count": 2
+  },
+  {
+    "industry": "Food Retail",
+    "nature_dependency": "Primary",
+    "count": 81
+  },
+  {
+    "industry": "Leisure Facilities",
+    "nature_dependency": "Tertiary",
+    "count": 50
+  },
+  {
+    "industry": "Food Distributors",
+    "nature_dependency": "Primary",
+    "count": 32
+  },
+  {
+    "industry": "Commercial and Residential Mortgage Finance",
+    "nature_dependency": "Tertiary",
+    "count": 68
+  },
+  {
+    "industry": "Paper Products",
+    "nature_dependency": "Secondary",
+    "count": 49
+  },
+  {
+    "industry": "Household Products",
+    "nature_dependency": "Tertiary",
+    "count": 26
+  },
+  {
+    "industry": "Technology Distributors",
+    "nature_dependency": "Tertiary",
+    "count": 39
+  },
+  {
+    "industry": "Real Estate Services",
+    "nature_dependency": "Tertiary",
+    "count": 31
+  },
+  {
+    "industry": "Distillers and Vintners",
+    "nature_dependency": "Primary",
+    "count": 38
+  },
+  {
+    "industry": "Oil and Gas Refining and Marketing",
+    "nature_dependency": "Primary",
+    "count": 141
+  },
+  {
+    "industry": "Calculating and Accounting Machines",
+    "nature_dependency": "Tertiary",
+    "count": 2
+  },
+  {
+    "industry": "Gas Utilities",
+    "nature_dependency": "Primary",
+    "count": 83
+  },
+  {
+    "industry": "Paper and Forest Product Distribution",
+    "nature_dependency": "Secondary",
+    "count": 2
+  },
+  {
+    "industry": "Automobile Manufacturers",
+    "nature_dependency": "Secondary",
+    "count": 66
+  },
+  {
+    "industry": "Silver Ores",
+    "nature_dependency": "Primary",
+    "count": 42
+  },
+  {
+    "industry": "Marine Transportation",
+    "nature_dependency": "Secondary",
+    "count": 95
+  },
+  {
+    "industry": "Investment Advice",
+    "nature_dependency": "Tertiary",
+    "count": 3
+  },
+  {
+    "industry": "Diversified Real Estate Activities",
+    "nature_dependency": "Tertiary",
+    "count": 19
+  },
+  {
+    "industry": "Agricultural Products and Services",
+    "nature_dependency": "Primary",
+    "count": 46
+  },
+  {
+    "industry": "Marine Ports and Services",
+    "nature_dependency": "Secondary",
+    "count": 26
+  },
+  {
+    "industry": "Home Improvement Retail",
+    "nature_dependency": "Secondary",
+    "count": 25
+  },
+  {
+    "industry": "Multi-Utilities",
+    "nature_dependency": "Primary",
+    "count": 8
+  },
+  {
+    "industry": "Tobacco",
+    "nature_dependency": "Primary",
+    "count": 17
+  },
+  {
+    "industry": "Independent Power Producers and Energy Traders",
+    "nature_dependency": "Primary",
+    "count": 27
+  },
+  {
+    "industry": "Pharmaceutical Product Distribution",
+    "nature_dependency": "Tertiary",
+    "count": 2
+  },
+  {
+    "industry": "Personal Credit Agencies",
+    "nature_dependency": "Tertiary",
+    "count": 6
+  },
+  {
+    "industry": "Industrial Gases",
+    "nature_dependency": "Primary",
+    "count": 12
+  },
+  {
+    "industry": "Aluminum",
+    "nature_dependency": "Primary",
+    "count": 30
+  },
+  {
+    "industry": "Copper",
+    "nature_dependency": "Primary",
+    "count": 17
+  },
+  {
+    "industry": "Oil and Gas Drilling",
+    "nature_dependency": "Primary",
+    "count": 45
+  },
+  {
+    "industry": "Footwear",
+    "nature_dependency": "Tertiary",
+    "count": 23
+  },
+  {
+    "industry": "Water Utilities",
+    "nature_dependency": "Primary",
+    "count": 36
+  },
+  {
+    "industry": "Alcoholic Beverage Stores",
+    "nature_dependency": "Tertiary",
+    "count": 2
+  },
+  {
+    "industry": "Real Estate Development",
+    "nature_dependency": "Tertiary",
+    "count": 77
+  },
+  {
+    "industry": "Tires and Rubber",
+    "nature_dependency": "Secondary",
+    "count": 13
+  },
+  {
+    "industry": "Gold Ores",
+    "nature_dependency": "Primary",
+    "count": 126
+  },
+  {
+    "industry": "Precious Metals and Minerals",
+    "nature_dependency": "Primary",
+    "count": 44
+  },
+  {
+    "industry": "Cargo Ground Transportation",
+    "nature_dependency": "Secondary",
+    "count": 4
+  },
+  {
+    "industry": "Motorcycle Manufacturers",
+    "nature_dependency": "Secondary",
+    "count": 12
+  },
+  {
+    "industry": "Racing Facilities",
+    "nature_dependency": "Tertiary",
+    "count": 2
+  },
+  {
+    "industry": "Electrical Equipment Distribution",
+    "nature_dependency": "Secondary",
+    "count": 2
+  },
+  {
+    "industry": "Industrial Inorganic Chemicals",
+    "nature_dependency": "Primary",
+    "count": 2
+  },
+  {
+    "industry": "Local General Freight Trucking",
+    "nature_dependency": "Secondary",
+    "count": 2
+  },
+  {
+    "industry": "Leisure Equipment and Product Distribution",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Specialty Contract Work",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Multi-line Insurance",
+    "nature_dependency": "Tertiary",
+    "count": 16
+  },
+  {
+    "industry": "Legal Services",
+    "nature_dependency": "Tertiary",
+    "count": 2
+  },
+  {
+    "industry": "Hotels And Motels",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Industrial Conglomerates",
+    "nature_dependency": "Secondary",
+    "count": 19
+  },
+  {
+    "industry": "Credit Reporting Services",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Pharmaceutical Products",
+    "nature_dependency": "Tertiary",
+    "count": 8
+  },
+  {
+    "industry": "Data Processing and Entry Services",
+    "nature_dependency": "Tertiary",
+    "count": 2
+  },
+  {
+    "industry": "Information Retrieval Services",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Groceries and Related Product Distribution",
+    "nature_dependency": "Primary",
+    "count": 1
+  },
+  {
+    "industry": "Highways and Railtracks",
+    "nature_dependency": "Secondary",
+    "count": 15
+  },
+  {
+    "industry": "Machinery Rental and Leasing",
+    "nature_dependency": "Secondary",
+    "count": 4
+  },
+  {
+    "industry": "Real Estate Operators And Lessors",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Diversified Financial Services",
+    "nature_dependency": "Tertiary",
+    "count": 5
+  },
+  {
+    "industry": "Copper Ores",
+    "nature_dependency": "Primary",
+    "count": 7
+  },
+  {
+    "industry": "Air Courier Services",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Durable Goods Distribution",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Grocery Stores",
+    "nature_dependency": "Primary",
+    "count": 1
+  },
+  {
+    "industry": "Diversified Metal Ores",
+    "nature_dependency": "Primary",
+    "count": 2
+  },
+  {
+    "industry": "General Management Services",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Medical Laboratory Services",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Heavy Construction",
+    "nature_dependency": "Secondary",
+    "count": 4
+  },
+  {
+    "industry": "Engineering Services",
+    "nature_dependency": "Tertiary",
+    "count": 2
+  },
+  {
+    "industry": "Security and Commodity Exchanges",
+    "nature_dependency": "Tertiary",
+    "count": 2
+  },
+  {
+    "industry": "Life Insurance",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Accounting, Auditing and Taxation Services",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Development Consulting",
+    "nature_dependency": "Tertiary",
+    "count": 3
+  },
+  {
+    "industry": "Machinery Components",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Warehousing and Storage",
+    "nature_dependency": "Secondary",
+    "count": 2
+  },
+  {
+    "industry": "Long-Distance General Freight Trucking",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Apparel",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Security Brokers and Dealers",
+    "nature_dependency": "Tertiary",
+    "count": 2
+  },
+  {
+    "industry": "Title Services",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Data Storage",
+    "nature_dependency": "Tertiary",
+    "count": 3
+  },
+  {
+    "industry": "Consumer Repair Services",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Offices Of Bank Holding Companies",
+    "nature_dependency": "Tertiary",
+    "count": 6
+  },
+  {
+    "industry": "Sawmills And Planing Mills",
+    "nature_dependency": "Primary",
+    "count": 1
+  },
+  {
+    "industry": "Travel and Tourism Services",
+    "nature_dependency": "Tertiary",
+    "count": 2
+  },
+  {
+    "industry": "Cameras",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Residential Electric Lighting Fixtures",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Beer, Ale and Malt Beverages",
+    "nature_dependency": "Primary",
+    "count": 1
+  },
+  {
+    "industry": "Consulting Services",
+    "nature_dependency": "Tertiary",
+    "count": 3
+  },
+  {
+    "industry": "Fabricated Structural Metal Products",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Patent Owners and Lessors",
+    "nature_dependency": "Tertiary",
+    "count": 3
+  },
+  {
+    "industry": "Gasoline Service Stations",
+    "nature_dependency": "Tertiary",
+    "count": 2
+  },
+  {
+    "industry": "Dental Care Equipment",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Drug Stores and Pharmacies",
+    "nature_dependency": "Tertiary",
+    "count": 3
+  },
+  {
+    "industry": "Services Incidental to Road Transportation of Freight",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Motor Vehicle Retail",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Refrigerated Warehousing and Storage",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Service Industry Machinery",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Welding and Soldering Equipment",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Residential Building Operators and Lessors",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Oil and Gas Distribution",
+    "nature_dependency": "Primary",
+    "count": 1
+  },
+  {
+    "industry": "Measuring, Analyzing, and Controlling Instruments",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Motion Picture and Video Production Companies",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Passenger Car Rental",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Electric Lighting and Wiring Equipment",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Apparel and Textile Distribution",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Sanitary Services",
+    "nature_dependency": "Tertiary",
+    "count": 2
+  },
+  {
+    "industry": "Travel Agencies",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Truck Rental and Leasing",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Printer, Facsimile and Photocopier Supplies",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Snack Food",
+    "nature_dependency": "Primary",
+    "count": 1
+  },
+  {
+    "industry": "Sports Services",
+    "nature_dependency": "Tertiary",
+    "count": 2
+  },
+  {
+    "industry": "Amusement And Recreation Services",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Consumer Electronics Stores",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Oil and Gas Field Services",
+    "nature_dependency": "Primary",
+    "count": 1
+  },
+  {
+    "industry": "Dolls and Stuffed Toys",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Instruments For Measuring And Testing Of Electrical Signals",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Medical Equipment",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Coffee",
+    "nature_dependency": "Primary",
+    "count": 1
+  },
+  {
+    "industry": "Medical Doctor Specialist Services",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Schools",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Power Generation Equipment",
+    "nature_dependency": "Primary",
+    "count": 1
+  },
+  {
+    "industry": "Seafood, Seafood Processing and Seafood Products",
+    "nature_dependency": "Primary",
+    "count": 1
+  },
+  {
+    "industry": "Carbon and Graphite Products",
+    "nature_dependency": "Primary",
+    "count": 1
+  },
+  {
+    "industry": "Aircraft Systems, Components and Equipment",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Sporting Goods",
+    "nature_dependency": "Secondary",
+    "count": 1
+  },
+  {
+    "industry": "Business Development Company",
+    "nature_dependency": "Tertiary",
+    "count": 1
+  },
+  {
+    "industry": "Cereal Breakfast Foods",
+    "nature_dependency": "Primary",
+    "count": 1
+  },
+  {
+    "industry": "Cigarettes",
+    "nature_dependency": "Primary",
+    "count": 1
+  }
+]
