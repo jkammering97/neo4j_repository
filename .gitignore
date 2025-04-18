@@ -6,3 +6,6 @@
 *.pkl
 /legacy
 *.DS_STOREdata/biodiversity_subset.json
+*data/biodiversity_subset.json
+legacy_data/
+tex/
